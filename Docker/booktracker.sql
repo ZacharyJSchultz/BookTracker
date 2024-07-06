@@ -1,6 +1,4 @@
-CREATE DATABASE BookFinder;
-
-USE BookFinder;
+USE BookTracker;
 
 DROP TABLE IF EXISTS Books;
 
