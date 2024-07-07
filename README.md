@@ -22,7 +22,7 @@ To install local-web-server: Install npm (https://docs.npmjs.com/downloading-and
 
 Of course, you can use any web server package/framework you'd like (python, java, etc.) to run this program. I chose to use npm and the local-web-server package, and the steps below are written with this particular package in mind, so your commands will likely differ if you choose to go about it in a different way.
 
-To run this program, you must have Docker (either the desktop version or terminal) and the npm package 'local-web-server' installed on your computer. Once Docker is installed, follow these steps:  
+Once these installed, follow these steps:  
 
 1. Navigate to the docker folder
    
