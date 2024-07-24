@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>BookTracker</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script src='assets/bootstrap/js/bootstrap.min.js'></script>
+    </head>
+    <body>
+        <div id="nav-placeholder">
+
+        </div>
+
+        <!-- JQuery Script to load navbar on page -->
+        <script>
+            $.get("nav.html", function(data){
+                $("#nav-placeholder").replaceWith(data);
+            });
+        </script>
+
+        <div id="viewdb">
+            <h1>TEST MAIN PAGE</h1>
+        </div>
+    </body>
+</html>

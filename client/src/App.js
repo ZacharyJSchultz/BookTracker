@@ -1,11 +1,12 @@
-import logo from './logo.svg';
 import './App.css';
 
-var main = require('./main.html')
+const main = require(process.env.PUBLIC_URL + '/main.html');
 
 function App() {
   return (
-    <iframe src={main }></iframe>
+    <div className="App">
+      <iframe src={main }></iframe>
+    </div>
   );
 }
 
