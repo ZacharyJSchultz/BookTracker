@@ -5,6 +5,7 @@
     "mysql2": "^3.10.3"
   },
   "devDependencies": {
+    "@types/react": "^18.3.3",
     "nodemon": "^3.1.4"
   },
   "scripts": {
