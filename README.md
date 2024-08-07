@@ -13,16 +13,11 @@ The goal of this project—from a coding standpoint—is to create a website sea
 The website will have both a form to input books, as well as a main page to view the already-read books. The database will store the book name and author name as the PK, as well as optional genre and rating categories. The site should also store the date the book was completed (defaulting to the date of the entry). Lastly, there should be a way to delete entries from the website, on the off chance an entry was mistaken.
 
 ## How To Run:
-Only two things are required to run this program: Docker (either the desktop version or terminal) and the npm package 'local-web-server'.
+To run this program, you must have Docker (either the desktop version or terminal) installed.
 
 To install Docker: https://docs.docker.com/get-docker/
 
-To install local-web-server: Install npm (https://docs.npmjs.com/downloading-and-installing-node-js-and-npm), then run:  
-    &emsp; &emsp; &ensp; ```npm install -g local-web-server```  
-
-Of course, you can use any web server package/framework you'd like (python, java, etc.) to run this program. I chose to use npm and the local-web-server package, and the steps below are written with this particular package in mind, so your commands will likely differ if you choose to go about it in a different way.
-
-Once these installed, follow these steps:  
+Once Docker is installed, follow these steps:  
 
 1. Navigate to the docker folder
    
@@ -30,10 +25,10 @@ Once these installed, follow these steps:
    &emsp; ```docker build -t booktracker .```  
 3. Turn Docker image into a container:  
     &emsp; ```docker run --detach --name=BookTracker -p:13306:3306 booktracker```  
-4. Navigate to the website folder  
+4. Navigate to the client folder  
 5. Run the command:  
-    &emsp; ```ws --spa main.html```  
-6. Navigate to http://127.0.0.1:8000  
+    &emsp; ```npm start```  
+6. Navigate to http://localhost:3000/ in your choice of browser (if not opened automatically by the previous command)
 7. Enjoy!  
 
 This sequence of commands creates a new Docker container for the process, binding the host's port 13306 (just a random port) to the container's port 3306 (MySQL connection port), allowing connection to the DB.
