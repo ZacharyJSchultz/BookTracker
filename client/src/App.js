@@ -7,7 +7,15 @@ import { useLocation } from 'react-router-dom'
 
 function App() {
   const loc = useLocation();
+  const [bookData, setBookData] = useState([])
+
   let currLoc = "";
+
+  useEffect(() => {
+    fetch("http://localhost:8000/message")
+      .then((res) => res.json())
+      .then((data) => setBookData(data.message));
+  }, []);
 
   if (loc.pathname.endsWith("/viewdb")) {
     currLoc = <ViewDB />;
@@ -25,6 +33,7 @@ function App() {
     <>
         <NavBar />
         {currLoc}
+        <h1>{bookData}</h1>
     </>
   );
 }
