@@ -10,11 +10,11 @@ function App() {
   const loc = useLocation();
   const [bookData, setBookData] = useState([])
 
-  useEffect(() => {
+  /*useEffect(() => {
     fetch("http://localhost:8000/message")
       .then((res) => res.json())
       .then((data) => setBookData(data.message));
-  }, []);
+  }, []);*/
 
   let currLoc = "";
 
@@ -34,7 +34,7 @@ function App() {
     <>
         <NavBar />
         {currLoc}
-        <h1>{bookData}</h1>
+        {/*<h1>{bookData}</h1>*/}
     </>
   );
 }
