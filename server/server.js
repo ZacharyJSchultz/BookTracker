@@ -51,7 +51,7 @@ con.connect(function(err) {
                 console.log("Error writing file:", err);
                 return res.status(500).send("Error writing file");
             }
-
+            console.log("Successfully written:", JSON.stringify(formData, null, 2));
             return res.status(200).send("Form data successfully written to file!");
         });
     });

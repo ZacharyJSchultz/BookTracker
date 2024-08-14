@@ -9,6 +9,7 @@ import { Location, useLocation } from 'react-router-dom'
 function App() {
   const loc: Location = useLocation();
   const [bookData, setBookData] = useState<JSON[]>([])
+  const [alertVisible, setAlertVisible] = useState(false);
 
   /*useEffect(() => {
     fetch("http://localhost:8000/message")
@@ -22,7 +23,7 @@ function App() {
     currLoc = <ViewDB />;
   }
   else if (loc.pathname.endsWith("/additem")) {
-    currLoc = <AddItem />;
+    currLoc = <AddItem alertVisible = {alertVisible} setAlertVisible = {setAlertVisible} />;
   }
   else if (loc.pathname.endsWith("/remitem")) {
     currLoc = <RemItem />;
@@ -32,7 +33,7 @@ function App() {
   }
   return (
     <>
-        <NavBar />
+        <NavBar setAlertVisible = {setAlertVisible} />
         {currLoc}
         {/*<h1>{bookData}</h1>*/}
     </>
