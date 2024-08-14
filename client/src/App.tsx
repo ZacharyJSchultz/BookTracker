@@ -3,12 +3,12 @@ import Main from './components/Main'
 import AddItem from './components/AddItem'
 import RemItem from './components/RemItem'
 import ViewDB from './components/ViewDB';
-import { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { Location, useLocation } from 'react-router-dom'
 
 function App() {
-  const loc = useLocation();
-  const [bookData, setBookData] = useState([])
+  const loc: Location = useLocation();
+  const [bookData, setBookData] = useState<JSON[]>([])
 
   /*useEffect(() => {
     fetch("http://localhost:8000/message")
@@ -16,7 +16,7 @@ function App() {
       .then((data) => setBookData(data.message));
   }, []);*/
 
-  let currLoc = "";
+  var currLoc: JSX.Element;
 
   if (loc.pathname.endsWith("/viewdb")) {
     currLoc = <ViewDB />;

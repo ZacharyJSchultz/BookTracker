@@ -1,3 +1,5 @@
+import React from 'react';
+
 function Main() {
     return (
         <div id="">
@@ -6,7 +8,7 @@ function Main() {
             <p style={{fontSize:"24px"}}>To start, please click one of the navigation bar items to 
                 add, remove, or view inputted books!</p>
             <br />
-            <p style={{fontSize:"16px"}}>For more information, please visit this website's <a href="https://github.com/ZacharyJSchultz/BookTracker" target="_blank">GitHub link</a></p>
+            <p style={{fontSize:"16px"}}>For more information, please visit this website's <a rel="noopener noreferrer" href="https://github.com/ZacharyJSchultz/BookTracker" target="_blank">GitHub link</a></p>
         </div>
     );
 };

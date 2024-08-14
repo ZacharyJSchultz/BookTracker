@@ -1,6 +1,12 @@
-import React from 'react'
+import React, {ReactNode} from 'react'
 
-const Alert = ( {strongtext, children, onClose}) => {
+interface Props {
+  strongtext: String;
+  children: ReactNode;
+  onClose: () => void;
+}
+
+const Alert = ({strongtext, children, onClose} : Props) => {
   return (
     <div className="alert alert-primary alert-dismissible fade show" role="alert">
         <strong>{strongtext}!</strong> {children}
