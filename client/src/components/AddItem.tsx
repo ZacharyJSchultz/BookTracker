@@ -12,17 +12,18 @@ type FormData = {
 };
 
 function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, setAlertVisible: React.Dispatch<React.SetStateAction<boolean>> }) {
-    const [failedValidation, setFailedValidation] = useState(false);
-    const [formData, setFormData] = useState<FormData>({
+    const [failedValidation, setFailedValidation] = useState(false);    // If form validation fails, set this variable (which will display validation errors, only upon failure)
+    const [formData, setFormData] = useState<FormData>({                // State variable for Form Data, set after every change to the form.
         title: "",
         author: "",
         rating: 0,
         genre: ""
     });
-    const [response, setResponse] = useState("");
+    const [response, setResponse] = useState("");   // Used to store response from server after submitting form (displayed in alert as strongtext)
 
     // Handle changes in form to update SetFormData (can't handle in handleSubmit because that is an async function, so formData could be reset before being sent)
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        // ID = the html ID of the value changed. Value = new value in that field. Basically, only update the field in the state variable that was modified
         const { id, value } = e.target;
 
         // Use ... (spread) operator to create shallow copy of formData to restore in formData
@@ -68,6 +69,7 @@ function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, se
                 console.error("Error! Form submission failed! Status:", response.status);
             }
 
+            // Check server's response, and set that response to the state variable (to be used in the alert)
             const res = await response.text()
 
             setResponse(res)
@@ -79,7 +81,7 @@ function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, se
 
     return (
         <>
-            {/* Display alert if alertVisible true (if form submitted) */}
+            {/* Display alert if alertVisible true (if form submitted). On close, hide alert and reset response */}
             {alertVisible && <Alert strongtext={response} onClose={() => {setAlertVisible(false); setResponse("")}}>
                 Click 'Add Books' or the 'X' on the right to add another item!</Alert>}
             

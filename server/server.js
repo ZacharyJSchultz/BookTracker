@@ -54,6 +54,7 @@ con.connect(function(err) {
                 }
             });*/
 
+            // Execute premade insert query with prepared statement (to prevent any sort of attacks / for extra safety)
             con.execute(insertQuery, [formData.title, formData.author, formData.rating || -1, formData.genre], (err, results, fields) => {
                 if (err) {
                     console.error("Error executing query:", err.stack);
@@ -61,6 +62,7 @@ con.connect(function(err) {
                 }
             });
 
+            // Log output for clarity/testing
             console.log("Successfully written:", 
                 "\nTitle:", formData.title, 
                 "\nAuthor(s):", formData.author, 
@@ -68,6 +70,7 @@ con.connect(function(err) {
                 "\nGenre(s):", formData.genre
             );
 
+            // Send message back to client, to be displayed in alert
             return res.status(200).send("Form successfully submitted");
         } catch (err) {
             console.error("Error executing query:", err.stack)
