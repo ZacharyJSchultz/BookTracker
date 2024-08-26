@@ -1,5 +1,5 @@
 import Alert from "./Alert";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import Button from "./Button";
 import React from 'react';
 import '../App.css'
@@ -18,7 +18,8 @@ function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, se
         author: "",
         rating: 0,
         genre: ""
-    })
+    });
+    const [response, setResponse] = useState("");
 
     // Handle changes in form to update SetFormData (can't handle in handleSubmit because that is an async function, so formData could be reset before being sent)
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,11 +63,15 @@ function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, se
                     rating: 0,
                     genre: ""
                 });
-                setAlertVisible(true);
             }
             else {
                 console.error("Error! Form submission failed! Status:", response.status);
             }
+
+            const res = await response.text()
+
+            setResponse(res)
+            setAlertVisible(true);
         } catch (e) {
             console.error("Error submitting form:", e);
         }
@@ -75,7 +80,7 @@ function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, se
     return (
         <>
             {/* Display alert if alertVisible true (if form submitted) */}
-            {alertVisible && <Alert strongtext="Form submitted" onClose={() => setAlertVisible(false)}>
+            {alertVisible && <Alert strongtext={response} onClose={() => {setAlertVisible(false); setResponse("")}}>
                 Click 'Add Books' or the 'X' on the right to add another item!</Alert>}
             
             {/* Display alert if alertVisible false (if form not submitted) */}
@@ -110,7 +115,7 @@ function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, se
                                 <label htmlFor="rating" className="form-label">Rating:</label>
                             </div>
                             <div className="col-auto">
-                                <input type="number" min="0" max="10" className="form-control" id="rating" onChange={handleChange} placeholder=""></input>
+                                <input type="number" min="1" max="10" className="form-control" id="rating" onChange={handleChange} placeholder=""></input>
                             </div>
                             <div className="col-auto">
                                 <span id="passwordHelpInline" className="form-text">Optional, number from 1-10</span>

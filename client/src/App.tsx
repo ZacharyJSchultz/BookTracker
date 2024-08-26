@@ -3,7 +3,7 @@ import Main from './components/Main'
 import AddItem from './components/AddItem'
 import RemItem from './components/RemItem'
 import ViewDB from './components/ViewDB';
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Location, useLocation } from 'react-router-dom'
 
 function App() {

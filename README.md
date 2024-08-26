@@ -27,12 +27,12 @@ Once Docker is installed, follow these steps:
     &emsp; ```docker run --detach --name=BookTracker -p:13306:3306 booktracker```  
 4. Navigate to the client folder, and run the command:  
     &emsp; ```npm install```
-5. Navigate to the server folder, and run the command:
-    &emsp; ```npm install```  
-6. From the server folder, run the command:
-    &emsp; ```npm start``` 
-7. Navigate back to the client folder, and run the command:
-    &emsp; ```npm start``` 
+5. Navigate to the server folder, and run the command:  
+    &emsp; ```npm install```
+6. From the server folder, run the command:  
+    &emsp; ```npm start```
+7. Navigate back to the client folder, and run the command:  
+    &emsp; ```npm start```
 8. Navigate to http://localhost:3000/ in your choice of browser (if not opened automatically by the previous command)
 9. Enjoy!  
 
@@ -40,3 +40,7 @@ This sequence of commands creates a new Docker container for the process, bindin
 
 To stop the container, use Docker Desktop or the command: ```docker container stop BookTracker```  
 To run the container, use Docker Desktop or the command: ```docker container start BookTracker```
+
+<br>
+
+Note: All times are stored in EST (America/New_York), no matter where the program is run from. Furthermore, times are all stored in 24-hour time.

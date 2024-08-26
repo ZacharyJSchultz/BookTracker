@@ -7,6 +7,8 @@ const bodyParser = require("body-parser");  // For parsing submit-form JSON
 
 const app = express();
 
+const insertQuery = "INSERT INTO Books VALUES (?, ?, ?, ?, NOW())";
+
 app.use(bodyParser.json());
 
 // Connect to back-end DB
@@ -40,20 +42,37 @@ con.connect(function(err) {
     })*/
 
     app.post('/submit-form', (req, res) => {
-        const formData = req.body;
+        try {
+            const formData = req.body;
 
-        // Store form data to file, as test
-        const filePath = path.join(__dirname, 'form-data.json');
+            // Write to file
+            /*const filePath = path.join(__dirname, 'form-data.json');      // Store form data to file, as test
+            fs.writeFile(filePath, JSON.stringify(formData, null, 2), (err) => {
+                if (err) {
+                    console.log("Error writing file:", err);
+                    return res.status(500).send("Error writing file");
+                }
+            });*/
 
-        // Write to file
-        fs.writeFile(filePath, JSON.stringify(formData, null, 2), (err) => {
-            if (err) {
-                console.log("Error writing file:", err);
-                return res.status(500).send("Error writing file");
-            }
-            console.log("Successfully written:", JSON.stringify(formData, null, 2));
-            return res.status(200).send("Form data successfully written to file!");
-        });
+            con.execute(insertQuery, [formData.title, formData.author, formData.rating || -1, formData.genre], (err, results, fields) => {
+                if (err) {
+                    console.error("Error executing query:", err.stack);
+                    return res.status(500).send("Error uploading to database");
+                }
+            });
+
+            console.log("Successfully written:", 
+                "\nTitle:", formData.title, 
+                "\nAuthor(s):", formData.author, 
+                "\nRating:", formData.rating || -1, 
+                "\nGenre(s):", formData.genre
+            );
+
+            return res.status(200).send("Form successfully submitted");
+        } catch (err) {
+            console.error("Error executing query:", err.stack)
+            return res.status(500).send("Error uploading to database");     // TODO: Handle duplicate entry errors!!
+        }
     });
 });
 
