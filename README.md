@@ -43,4 +43,4 @@ To run the container, use Docker Desktop or the command: ```docker container sta
 
 <br>
 
-Note: All times are stored in EST (America/New_York), no matter where the program is run from. Furthermore, times are all stored in 24-hour time.
+<b>Note:</b> All times are stored in EST (America/New_York), no matter where the program is run from. Furthermore, times are all stored in 24-hour time.
