@@ -1,8 +1,6 @@
 import Alert from "./Alert";
-import { FormEvent, useState, useEffect } from "react";
-import Button from "./Button";
+import { FormEvent, useState } from "react";
 import React from 'react';
-import '../App.css'
 
 type FormData = {
     title: string;
@@ -82,8 +80,14 @@ function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, se
     return (
         <>
             {/* Display alert if alertVisible true (if form submitted). On close, hide alert and reset response */}
-            {alertVisible && <Alert strongtext={response} onClose={() => {setAlertVisible(false); setResponse("")}}>
-                Click 'Add Books' or the 'X' on the right to add another item!</Alert>}
+            {alertVisible && 
+                <Alert alertType={response.includes("Error") ? "alert-danger" : "alert-primary"} strongtext={response} onClose={() => {setAlertVisible(false); setResponse("")}}>
+                    {
+                        response.includes("Error") ? 
+                        "Double-check your spelling and verify that this book isn't already in the database! To try again, click 'Add Books' or the 'X' on the right!" : 
+                        "Click 'Add Books' or the 'X' on the right to add another item!"
+                    }
+                </Alert>}
             
             {/* Display alert if alertVisible false (if form not submitted) */}
             {!alertVisible &&

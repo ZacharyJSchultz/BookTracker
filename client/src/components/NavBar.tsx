@@ -12,7 +12,7 @@ function NavBar({ setAlertVisible } : { setAlertVisible: React.Dispatch<React.Se
                     <li className="navbar-item px-2" id={"0"} onMouseEnter={(event) => {
                         let obj = event.currentTarget;
                         setSelectedIndex(parseInt(obj.id));
-                    }} onMouseLeave={(event) => {
+                    }} onMouseLeave={() => {
                         setSelectedIndex(-1);
                     }} style={{
                         backgroundColor: selectedIndex === 0 ? "#007bff" : "transparent",
@@ -23,9 +23,9 @@ function NavBar({ setAlertVisible } : { setAlertVisible: React.Dispatch<React.Se
                     <li className="navbar-item px-2" id={"1"} onMouseEnter={(event) => {
                         let obj = event.currentTarget;
                         setSelectedIndex(parseInt(obj.id));
-                    }} onMouseLeave={(event) => {
+                    }} onMouseLeave={() => {
                         setSelectedIndex(-1);
-                    }} onClick={(event) => {
+                    }} onClick={() => {
                         // Pass alertVisible as a variable into Nav simply so clicking "Add Books" brings back the form after submitting
                         setAlertVisible(false);
                     }} style={{

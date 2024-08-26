@@ -10,6 +10,8 @@ const app = express();
 const insertQuery = "INSERT INTO Books VALUES (?, ?, ?, ?, NOW())";
 
 app.use(bodyParser.json());
+app.use(cors());
+app.use(express.json());
 
 // Connect to back-end DB
 var con = mysql.createConnection({
@@ -23,6 +25,7 @@ var con = mysql.createConnection({
 con.connect(function(err) {
     if (err)
         throw err;
+
     console.log("Connection Successful!");
 
     /*con.query('SELECT * FROM Books', function(err, rslt) {
@@ -41,6 +44,7 @@ con.connect(function(err) {
         });
     })*/
 
+    // Handle form submission, and send to database
     app.post('/submit-form', (req, res) => {
         try {
             const formData = req.body;
@@ -55,34 +59,49 @@ con.connect(function(err) {
             });*/
 
             // Execute premade insert query with prepared statement (to prevent any sort of attacks / for extra safety)
-            con.execute(insertQuery, [formData.title, formData.author, formData.rating || -1, formData.genre], (err, results, fields) => {
+            con.execute(insertQuery, [formData.title, formData.author, formData.rating || 0, formData.genre], (err) => {
                 if (err) {
-                    console.error("Error executing query:", err.stack);
-                    return res.status(500).send("Error uploading to database");
+                    if (err.code === "ER_DUP_ENTRY") {
+                        console.error("Error: Duplicate entry");
+                        return res.status(500).send("Error: This book already exists in the database");
+                    } else {
+                        console.error("Error executing query:", err.stack);
+                        return res.status(500).send("Error uploading to database");
+                    }
+                } else {
+                    // Log output for clarity/testing
+                    console.log("Successfully written:", 
+                        "\nTitle:", formData.title, 
+                        "\nAuthor(s):", formData.author, 
+                        "\nRating:", formData.rating || 0, 
+                        "\nGenre(s):", formData.genre
+                    );
+
+                    // Send message back to client, to be displayed in alert
+                    return res.status(200).send("Form successfully submitted");
                 }
             });
-
-            // Log output for clarity/testing
-            console.log("Successfully written:", 
-                "\nTitle:", formData.title, 
-                "\nAuthor(s):", formData.author, 
-                "\nRating:", formData.rating || -1, 
-                "\nGenre(s):", formData.genre
-            );
-
-            // Send message back to client, to be displayed in alert
-            return res.status(200).send("Form successfully submitted");
         } catch (err) {
             console.error("Error executing query:", err.stack)
-            return res.status(500).send("Error uploading to database");     // TODO: Handle duplicate entry errors!!
+            return res.status(500).send("Error uploading to database");
+        }
+    });
+
+    // Handle the fetching of data, sending it to front-end to display in table
+    app.get("/view-db", (req, res) => {
+        try {
+            con.query('SELECT * FROM Books ORDER BY dateCompleted DESC', function(err, rslt) {
+                if (err)
+                    throw err;
+
+                return res.status(200).json(rslt)
+            });
+        } catch (e) {
+            console.error("Error fetching data:", e)
+            return res.status(500).send("Error fetching data");
         }
     });
 });
-
-app.use(cors());
-app.use(express.json());
-
-// Handle form submission, and send to database
 
 /*app.get('/message', (req, res) => {
     res.json({ message: "This is a test!" });
