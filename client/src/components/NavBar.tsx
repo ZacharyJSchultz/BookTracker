@@ -34,7 +34,7 @@ function NavBar({ setAlertVisible } : { setAlertVisible: React.Dispatch<React.Se
                     }}>
                         <Link to="/additem" className="nav-link" style={{color:"inherit", fontWeight:500}}>Add Books</Link>
                     </li>
-                    <li className="navbar-item px-2" id={"2"} onMouseEnter={(event) => {
+                    {/*<li className="navbar-item px-2" id={"2"} onMouseEnter={(event) => {
                         let obj = event.currentTarget;
                         setSelectedIndex(parseInt(obj.id));
                     }} onMouseLeave={(event) => {
@@ -44,7 +44,7 @@ function NavBar({ setAlertVisible } : { setAlertVisible: React.Dispatch<React.Se
                         color: selectedIndex === 2 ? "#D3D3D3" : "white"
                     }}>
                         <Link to="/remitem" className="nav-link" style={{color:"inherit", fontWeight:500}}>Remove Books</Link>
-                    </li>
+                    </li>*/}
                 </ul>
             </div>
         </nav>

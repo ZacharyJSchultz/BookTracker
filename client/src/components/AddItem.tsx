@@ -47,9 +47,9 @@ function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, se
         try {
             setFailedValidation(false);     // Set form to valid, so no validation stuff shows up on screen
 
-            const response = await fetch('http://localhost:8000/submit-form', {
-                method: 'POST',
-                headers: {"Content-Type": "application/json",},
+            const response = await fetch("http://localhost:8000/submit-form", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
                 body: JSON.stringify(formData),
             });
 
