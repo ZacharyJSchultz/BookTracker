@@ -31,9 +31,9 @@ Once Docker is installed, follow these steps:
     &emsp; ```npm install```
 6. From the server folder, run the command:  
     &emsp; ```npm start```
-7. Navigate back to the client folder, and run the command:  
+7. From a new terminal window, navigate back to the client folder, and run the command:  
     &emsp; ```npm start```
-8. Navigate to http://localhost:3000/ in your choice of browser (if not opened automatically by the previous command)
+8. Navigate to http://localhost:3000/ in your choice of browser (if not opened automatically by the previous command).
 9. Enjoy!  
 
 This sequence of commands creates a new Docker container for the process, binding the host's port 13306 (just a random port) to the container's port 3306 (MySQL connection port), allowing connection to the DB. Then, it installs the dependencies for the front-end and back-end, before running each one.
