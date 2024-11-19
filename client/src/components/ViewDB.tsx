@@ -65,7 +65,11 @@ function ViewDB() {
         if (!response.ok) {
           console.log("Error removing entry!");
         }
-        setData(data.filter(item => item.title !== bookToRemove.title && item.author !== bookToRemove.author));
+        // Originally had this conditional as &&, however the way filter() works is that it removes any item where the condition returns false. So if
+        // title != remove.title && author == remove.author (meaning it shouldn't be removed, as only the author matches), the condition evaluates to
+        // (false && true), which returns false. Thus, this item would be removed. Thus, changing it to || means that the condition returns true unless
+        // both booleans are false, in which case the item is removed. A little counter-intuitive to think that || means both must be satisfied, but it makes sense.
+        setData(data.filter(item => item.title !== bookToRemove.title || item.author !== bookToRemove.author));
 
         setRemoveModalVisible(false);
         setRemoveAlertVisible(true);
