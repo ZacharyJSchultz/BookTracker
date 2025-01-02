@@ -57,7 +57,7 @@ To run the container, use Docker Desktop or the command: ```docker container sta
 
 #### Add Book
 ![Add Book Screenshot](/screenshots/add_book_form.png?raw=true)
-![Add Book Complete Screenshot](/screenshots/add_book_form_complete.png?raw=true)
+![Add Book Complete Screenshot](/screenshots/add_book_form_success.png?raw=true)
 
 #### View Database / Sorting
 
