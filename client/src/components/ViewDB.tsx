@@ -42,7 +42,9 @@ function ViewDB() {
     });
 
     useEffect(() => {
-        fetch("http://localhost:8000/view-db")
+        fetch("http://localhost:8000/view-db", {
+          method: "GET"
+        })
         .then((res) => {
             if (!res.ok)
                 throw new Error("Error: Response not ok");
@@ -122,7 +124,14 @@ function ViewDB() {
         [sortProp]: -sortDirection[sortProp]
     });
 
+      for(let i = 0; i < data.length; i++) {
+        console.log(data[i]);
+      }
       setData(sorted);
+      console.log("------------");
+      for(let i = 0; i < data.length; i++) {
+        console.log(data[i]);
+      }
     };
 
     return(
@@ -169,8 +178,9 @@ function ViewDB() {
                         </tr>
                     </thead>
                     <tbody>
+                        {/* Note: ${row.title}-${row.author} is used because (row.title, row.author) is deceptive: it's NOT a tuple; it only uses the last value */}
                         {data.map((row, index) => (
-                            <tr key={(row.title, row.author)}>
+                            <tr key={(`${row.title}-${row.author}`)}>
                                 <th scope="row">{index+1}</th>
                                 <td>{row.title}</td>
                                 <td>{row.author}</td>

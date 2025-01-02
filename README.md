@@ -1,5 +1,7 @@
 # BookTracker
 
+![View DB Screenshot](/screenshots/view_db.png?raw=true)
+
 Author: zjs32@pitt.edu
 
 ## Purpose:
@@ -23,6 +25,9 @@ Once Docker is installed, follow these steps:
    
 2. Turn Dockerfile into an image:  
    &emsp; ```docker build -t booktracker .```  
+   <h6></h6>
+   &emsp; If this command (or the next) throws an error due to lack of permissions, try running terminal as administrator and/or put 'sudo' before the command!
+   <h6></h6>
 3. Turn Docker image into a container:  
     &emsp; ```docker run --detach --name=BookTracker -p:13306:3306 booktracker```  
 4. Navigate to the client folder, and run the command:  
@@ -44,3 +49,24 @@ To run the container, use Docker Desktop or the command: ```docker container sta
 <br>
 
 <b>Note:</b> All times are stored in EST (America/New_York), no matter where the program is run from. Furthermore, times are all stored in 24-hour time.
+
+## Screenshots
+
+#### Home Page
+![Home Page Screenshot](/screenshots/home_page.png?raw=true)  
+
+#### Add Book
+![Add Book Screenshot](/screenshots/add_book_form.png?raw=true)
+![Add Book Complete Screenshot](/screenshots/add_book_form_complete.png?raw=true)
+
+#### View Database / Sorting
+
+Sorted by date:
+![View DB Date-sorted Screenshot](/screenshots/view_db_datesort.png?raw=true)
+
+Sorted by title:
+![View DB Title-sorted Screenshot](/screenshots/view_db_titlesort.png?raw=true)
+
+#### Remove Item:
+![Remove Item Screenshot](/screenshots/remove_item.png?raw=true)
+![Remove Item Success Screenshot](/screenshots/remove_item_success.png?raw=true)
