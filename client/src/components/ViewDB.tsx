@@ -1,22 +1,85 @@
-import React, { useState, useEffect } from 'react'
-import { format, parseISO, isBefore, isAfter } from 'date-fns'
-import Modal from './Modal'
-import Alert from './Alert'
+import React, { useState, useEffect } from 'react';
+import { format, parseISO, isBefore, isAfter } from 'date-fns';
+import Modal from './Modal';
+import Alert from './Alert';
+import TableElement from './TableElement';
 
-interface DataRow {
+export interface DataRow {
     title: string
     author: string
     rating: number
-    genres: string
     dateCompleted: string
+    Fiction: boolean;
+    NonFiction: boolean;
+    ActionAdventure: boolean;
+    Comedy: boolean;
+    CrimeMystery: boolean;
+    Fantasy: boolean;
+    Romance: boolean;
+    ScienceFiction: boolean;
+    HistoricalFiction: boolean;
+    SuspenseThriller: boolean;
+    Drama: boolean;
+    Horror: boolean;
+    Poetry: boolean;
+    GraphicNovel: boolean;
+    YoungAdult: boolean;
+    ChildrensBook: boolean;
+    Comic: boolean;
+    MemoirAutobiography: boolean;
+    Biography: boolean;
+    FoodDrink: boolean;
+    ArtPhotography: boolean;
+    SelfHelp: boolean;
+    History: boolean;
+    Travel: boolean;
+    TrueCrime: boolean;
+    ScienceTechnology: boolean;
+    HumanitiesSocialSciences: boolean;
+    Essay: boolean;
+    Guide: boolean;
+    ReligionSpirituality: boolean;
+    Other: boolean;
 }
+
+export type DataRowKey = keyof DataRow;
 
 interface SortDir {
   title: number
   author: number
   rating: number
-  genres: number
   dateCompleted: number
+  Fiction: number;
+  NonFiction: number;
+  ActionAdventure: number;
+  Comedy: number;
+  CrimeMystery: number;
+  Fantasy: number;
+  Romance: number;
+  ScienceFiction: number;
+  HistoricalFiction: number;
+  SuspenseThriller: number;
+  Drama: number;
+  Horror: number;
+  Poetry: number;
+  GraphicNovel: number;
+  YoungAdult: number;
+  ChildrensBook: number;
+  Comic: number;
+  MemoirAutobiography: number;
+  Biography: number;
+  FoodDrink: number;
+  ArtPhotography: number;
+  SelfHelp: number;
+  History: number;
+  Travel: number;
+  TrueCrime: number;
+  ScienceTechnology: number;
+  HumanitiesSocialSciences: number;
+  Essay: number;
+  Guide: number;
+  ReligionSpirituality: number;
+  Other: number;
 }
 
 interface BookKey {
@@ -37,9 +100,78 @@ function ViewDB() {
       title: 1,
       author: 1,
       rating: 1,
-      genres: 1,
-      dateCompleted: 1
+      dateCompleted: 1,
+      Fiction: 1,
+      NonFiction: 1,
+      ActionAdventure: 1,
+      Comedy: 1,
+      CrimeMystery: 1,
+      Fantasy: 1,
+      Romance: 1,
+      ScienceFiction: 1,
+      HistoricalFiction: 1,
+      SuspenseThriller: 1,
+      Drama: 1,
+      Horror: 1,
+      Poetry: 1,
+      GraphicNovel: 1,
+      YoungAdult: 1,
+      ChildrensBook: 1,
+      Comic: 1,
+      MemoirAutobiography: 1,
+      Biography: 1,
+      FoodDrink: 1,
+      ArtPhotography: 1,
+      SelfHelp: 1,
+      History: 1,
+      Travel: 1,
+      TrueCrime: 1,
+      ScienceTechnology: 1,
+      HumanitiesSocialSciences: 1,
+      Essay: 1,
+      Guide: 1,
+      ReligionSpirituality: 1,
+      Other: 1,
     });
+
+    // Used when creating the Table Elements
+    const tableElementNames = {
+      title: "Title",
+      author: "Author",
+      rating: "Rating",
+      dateCompleted: "Date Completed",
+      Fiction: "Fiction",
+      NonFiction: "Non-Fiction",
+      ActionAdventure: "Action / Adventure",
+      Comedy: "Comedy", 
+      CrimeMystery: "Crime / Mystery", 
+      Fantasy: "Fantasy", 
+      Romance: "Romance", 
+      ScienceFiction: "Science Fiction", 
+      HistoricalFiction: "Historical Fiction",
+      SuspenseThriller: "Suspense / Thriller",
+      Drama: "Drama", 
+      Horror: "Horror", 
+      Poetry: "Poetry", 
+      GraphicNovel: "Graphic Novel", 
+      YoungAdult: "Young Adult", 
+      ChildrensBook: "Children's Book", 
+      Comic: "Comic", 
+      MemoirAutobiography: "Memoir Autobiography", 
+      Biography: "Biography",
+      FoodDrink: "Food & Drink", 
+      ArtPhotography: "Art / Photography", 
+      SelfHelp: "Self Help",
+      History: "History", 
+      Travel: "Travel", 
+      TrueCrime: "True Crime", 
+      ScienceTechnology: "Science / Technology", 
+      HumanitiesSocialSciences: "Humanities / Social Sciences", 
+      Essay: "Essay",
+      Guide: "Guide",
+      ReligionSpirituality: "Religion / Spirituality", 
+      Other: "Other", 
+    };
 
     useEffect(() => {
         fetch("http://localhost:8000/view-db", {
@@ -52,7 +184,7 @@ function ViewDB() {
             return res.json();
         })
         .then((data) => setData(data))
-        .catch((e) => console.error("Error fetching table:", e))
+        .catch((e) => console.error("Error fetching table:", e));
     }, []);
 
     const handleRemove = async () => {
@@ -77,7 +209,7 @@ function ViewDB() {
         setRemoveAlertVisible(true);
     };
 
-    const handleSort = (sortProp: keyof DataRow) => {
+    const handleSort = (sortProp: DataRowKey) => {
       const sorted = [...data].sort((a, b) => {
         if (sortProp === "dateCompleted") {
           let aDate = parseISO(a[sortProp])
@@ -105,8 +237,8 @@ function ViewDB() {
             return 0
         }
         else {
-          let aLower = a[sortProp].toString().toLowerCase();
-          let bLower = b[sortProp].toString().toLowerCase();
+          let aLower = a[sortProp]?.toString().toLowerCase();
+          let bLower = b[sortProp]?.toString().toLowerCase();
 
           // Always push N/A to the bottom of the sort
           if (aLower === "")
@@ -128,27 +260,35 @@ function ViewDB() {
         [sortProp]: -sortDirection[sortProp]
     });
 
-      for(let i = 0; i < data.length; i++) {
+      /*for(let i = 0; i < data.length; i++) {
         console.log(data[i]);
-      }
+      }*/
       setData(sorted);
-      console.log("------------");
+      /*console.log("------------");
       for(let i = 0; i < data.length; i++) {
         console.log(data[i]);
-      }
+      }*/
     };
 
+    const generateRows = (key: string) => {
+      console.log(key);
+      const typedKey = key as DataRowKey;
+      return (<TableElement handleSort={handleSort} sortDir={sortDirection[typedKey]} key={typedKey}>{tableElementNames[typedKey]}</TableElement>);
+    }
+    
     return(
         <>
             {removeAlertVisible && (
               <Alert alertType={`alert ${responseOk ? "alert-primary" : "alert-danger"}`} strongtext={responseText} onClose={() => setRemoveAlertVisible(false)}>{!responseOk && "Please try again."}</Alert>
             )}
+            {}
             <div className="container mt-5">
                 <table className="table table-bordered table-hover">
                     <thead>
                         <tr>
                             <th scope="col" className="text-center"><span className="align-middle">#</span></th>
-                            <th scope="col" className="text-center">
+                            {Object.keys(tableElementNames).map((key) => generateRows(key))}
+                            {/*<th scope="col" className="text-center">
                               <span className="align-middle">Title</span>
                               <button type="button" className="btn btn-sm btn-secondary float-end" aria-label="Sort" onClick={() => handleSort("title")}>
                                 <b>{sortDirection.title === 1 ? "↓" : "↑"}</b>
@@ -178,7 +318,7 @@ function ViewDB() {
                                 <b>{sortDirection.dateCompleted === 1 ? "↓" : "↑"}</b>
                               </button>
                             </th>
-                            <th scope="col" className="text-center"></th>
+                            <th scope="col" className="text-center"></th>*/}
                         </tr>
                     </thead>
                     <tbody>
@@ -189,8 +329,8 @@ function ViewDB() {
                                 <td>{row.title}</td>
                                 <td>{row.author}</td>
                                 <td>{row.rating || "N/A"}</td>
-                                <td>{row.genres || "N/A"}</td>
                                 <td>{row.dateCompleted ? format(row.dateCompleted, 'MMMM dd, yyyy hh:mm a') : "N/A"}</td>
+                                {/* TODO: INSERT GENRES */}
                                 <td className="text-center"><button type="button" className="btn btn-close" aria-label="Close" 
                                 onClick={() => {
                                     setBookToRemove({title: row.title, author: row.author});

@@ -1,4 +1,6 @@
 import Alert from "./Alert";
+import Checkbox from "./Checkbox";
+import Radio from "./Radio";
 import { FormEvent, useState } from "react";
 import React from 'react';
 
@@ -6,7 +8,37 @@ type FormData = {
     title: string;
     author: string;
     rating: number;
-    genre: string;
+    Fiction?: boolean;
+    NonFiction?: boolean;
+    ActionAdventure?: boolean;
+    Comedy?: boolean;
+    CrimeMystery?: boolean;
+    Fantasy?: boolean;
+    Romance?: boolean;
+    ScienceFiction?: boolean;
+    HistoricalFiction?: boolean;
+    SuspenseThriller?: boolean;
+    Drama?: boolean;
+    Horror?: boolean;
+    Poetry?: boolean;
+    GraphicNovel?: boolean;
+    YoungAdult?: boolean;
+    ChildrensBook?: boolean;
+    Comic?: boolean;
+    MemoirAutobiography?: boolean;
+    Biography?: boolean;
+    FoodDrink?: boolean;
+    ArtPhotography?: boolean;
+    SelfHelp?: boolean;
+    History?: boolean;
+    Travel?: boolean;
+    TrueCrime?: boolean;
+    ScienceTechnology?: boolean;
+    HumanitiesSocialSciences?: boolean;
+    Essay?: boolean;
+    Guide?: boolean;
+    ReligionSpirituality?: boolean;
+    Other?: boolean;
 };
 
 function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, setAlertVisible: React.Dispatch<React.SetStateAction<boolean>> }) {
@@ -15,20 +47,57 @@ function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, se
         title: "",
         author: "",
         rating: 0,
-        genre: ""
     });
-    const [response, setResponse] = useState("");   // Used to store response from server after submitting form (displayed in alert as strongtext)
+    const [response, setResponse] = useState("");           // Used to store response from server after submitting form (displayed in alert as strongtext)
+    const [nonFiction, setNonFiction] = useState(false);    // nonFiction and fiction used to display subgenres for the respective genre
+    const [fiction, setFiction] = useState(false);
 
     // Handle changes in form to update SetFormData (can't handle in handleSubmit because that is an async function, so formData could be reset before being sent)
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         // ID = the html ID of the value changed. Value = new value in that field. Basically, only update the field in the state variable that was modified
-        const { id, value } = e.target;
+        const { id, value, checked } = e.target;
 
-        // Use ... (spread) operator to create shallow copy of formData to restore in formData
-        setFormData({
-            ...formData,
-            [id]: value
-        });
+        if(id == "Fiction") {
+            setNonFiction(false);
+            setFiction(checked);   // Set fiction to true if fiction is checked
+
+            // Reset all genre fields and set fiction
+            setFormData({
+                title: formData.title,
+                author: formData.author,
+                rating: formData.rating,
+                Fiction: checked,
+                NonFiction: !checked,
+            });
+        }
+        else if(id == "NonFiction") {
+            setFiction(false);
+            setNonFiction(checked);
+
+            setFormData({
+                title: formData.title,
+                author: formData.author,
+                rating: formData.rating,
+                Fiction: !checked,
+                NonFiction: checked,
+            });
+        }
+        else {
+            if(e.target.type == "checkbox") {
+                setFormData({
+                    ...formData,
+                    [id]: checked       // Need to use checked instead of value if checkbox (because default value is always 'on' for checkboxes)
+                });
+            }
+            else {
+            // Use ... (spread) operator to create shallow copy of formData to restore in formData
+            setFormData({
+                ...formData,
+                [id]: value
+            });
+            }
+        }
+        console.log(formData);
     }
 
     // Handle submitting of form to send to server and display alert
@@ -60,7 +129,6 @@ function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, se
                     title: "",
                     author: "",
                     rating: 0,
-                    genre: ""
                 });
             }
             else {
@@ -130,9 +198,44 @@ function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, se
 
                         {/* Genre */}
                         <div className="mb-4 form-group">
-                            <label htmlFor="genre" className="form-label">Genre(s):</label>
-                            <input type="text" className="form-control" id="genre" onChange={handleChange} placeholder="e.g., Action/Adventure, Mystery, Nonfiction, Fantasy, etc."></input>
-                            <span id="passwordHelpInline" className="form-text">Optional, can list one or many genres</span>
+                            <p className="form-label">Genre(s):</p>
+                            <Radio id="Fiction" handleChange={handleChange}>Fiction</Radio>
+                            <Radio id="NonFiction" handleChange={handleChange}>Non-Fiction</Radio>
+                            <p></p>
+                            {fiction && <>
+                                <Checkbox id="ActionAdventure" handleChange={handleChange}>Action / Adventure</Checkbox>
+                                <Checkbox id="Comedy" handleChange={handleChange}>Comedy</Checkbox>
+                                <Checkbox id="CrimeMystery" handleChange={handleChange}>Crime / Mystery</Checkbox>
+                                <Checkbox id="Fantasy" handleChange={handleChange}>Fantasy</Checkbox>
+                                <Checkbox id="Romance" handleChange={handleChange}>Romance</Checkbox>
+                                <Checkbox id="ScienceFiction" handleChange={handleChange}>Science Fiction</Checkbox>
+                                <Checkbox id="HistoricalFiction" handleChange={handleChange}>Historical Fiction</Checkbox>
+                                <Checkbox id="SuspenseThriller" handleChange={handleChange}>Suspense / Thriller</Checkbox>
+                                <Checkbox id="Drama" handleChange={handleChange}>Drama</Checkbox>
+                                <Checkbox id="Horror" handleChange={handleChange}>Horror</Checkbox>
+                                <Checkbox id="Poetry" handleChange={handleChange}>Poetry</Checkbox>
+                                <Checkbox id="GraphicNovel" handleChange={handleChange}>Graphic Novel</Checkbox>
+                                <Checkbox id="YoungAdult" handleChange={handleChange}>Young Adult</Checkbox>
+                                <Checkbox id="ChildrensBook" handleChange={handleChange}>Children's Book</Checkbox>
+                                <Checkbox id="Comic" handleChange={handleChange}>Comic</Checkbox>
+                                <Checkbox id="Other" handleChange={handleChange}>Other</Checkbox>
+                            </>}
+                            {nonFiction && <>
+                                <Checkbox id="MemoirAutobiography" handleChange={handleChange}>Memoir / Autobiography</Checkbox>
+                                <Checkbox id="FoodDrink" handleChange={handleChange}>Food & Drink</Checkbox>
+                                <Checkbox id="ArtPhotography" handleChange={handleChange}>Art / Photography</Checkbox>
+                                <Checkbox id="SelfHelp" handleChange={handleChange}>Self Help</Checkbox>
+                                <Checkbox id="History" handleChange={handleChange}>History</Checkbox>
+                                <Checkbox id="Travel" handleChange={handleChange}>Travel</Checkbox>
+                                <Checkbox id="TrueCrime" handleChange={handleChange}>True Crime</Checkbox>
+                                <Checkbox id="ScienceTechnology" handleChange={handleChange}>Science / Technology</Checkbox>
+                                <Checkbox id="HumanitiesSocialSciences" handleChange={handleChange}>Humanities / Social Sciences</Checkbox>
+                                <Checkbox id="Essay" handleChange={handleChange}>Essay</Checkbox>
+                                <Checkbox id="Guide" handleChange={handleChange}>Guide</Checkbox>
+                                <Checkbox id="ReligionSpirituality" handleChange={handleChange}>Religion / Spirituality</Checkbox>
+                                <Checkbox id="Other" handleChange={handleChange}>Other</Checkbox>
+                            </>}
+                            <p id="passwordHelpInline" className="form-text">Optional, can select one, many, or no genres</p>
                         </div>
 
                         {/* Submit Button */}

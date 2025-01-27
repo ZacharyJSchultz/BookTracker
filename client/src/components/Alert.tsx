@@ -1,8 +1,8 @@
 import React, {ReactNode} from 'react'
 
 interface Props {
-  alertType?: String;
-  strongtext: String;
+  alertType?: string;
+  strongtext: string;
   children: ReactNode;
   onClose: () => void;
 }
