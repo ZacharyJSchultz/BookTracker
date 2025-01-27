@@ -199,9 +199,9 @@ function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, se
                         {/* Genre */}
                         <div className="mb-4 form-group">
                             <p className="form-label">Genre(s):</p>
-                            <Radio id="Fiction" handleChange={handleChange}>Fiction</Radio>
-                            <Radio id="NonFiction" handleChange={handleChange}>Non-Fiction</Radio>
-                            <p></p>
+                            <Radio id="Fiction" handleChange={handleChange} checked={fiction}>Fiction</Radio>
+                            <Radio id="NonFiction" handleChange={handleChange} checked={nonFiction}>Non-Fiction</Radio>
+                            <p />
                             {fiction && <>
                                 <Checkbox id="ActionAdventure" handleChange={handleChange}>Action / Adventure</Checkbox>
                                 <Checkbox id="Comedy" handleChange={handleChange}>Comedy</Checkbox>

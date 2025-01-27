@@ -3,6 +3,7 @@ import { format, parseISO, isBefore, isAfter } from 'date-fns';
 import Modal from './Modal';
 import Alert from './Alert';
 import TableElement from './TableElement';
+import Radio from './Radio';
 
 export interface DataRow {
     title: string
@@ -94,6 +95,7 @@ function ViewDB() {
     const [responseOk, setResponseOk] = useState(false);
     const [responseText, setResponseText] = useState("");
     const [bookToRemove, setBookToRemove] = useState<BookKey>({title: "", author: ""});
+    const [displayGenres, setDisplayGenres] = useState(3);  // 0 = all genres, 1 = fiction genres, 2 = nonfiction genres, 3 = no genres
 
     // Determines whether the sort direction will sort ascending (Z-A) or descending (A-Z). 1 = descending, -1 = ascending
     const [sortDirection, setSortDirection] = useState<SortDir>({
@@ -134,43 +136,43 @@ function ViewDB() {
       Other: 1,
     });
 
-    // Used when creating the Table Elements
+    // Used when creating the Table Elements. The first num in str represents whether it's fiction (1), nonfiction (2), or both (0), with non-genre attributes receiving a special distinction (4)
     const tableElementNames = {
-      title: "Title",
-      author: "Author",
-      rating: "Rating",
-      dateCompleted: "Date Completed",
-      Fiction: "Fiction",
-      NonFiction: "Non-Fiction",
-      ActionAdventure: "Action / Adventure",
-      Comedy: "Comedy", 
-      CrimeMystery: "Crime / Mystery", 
-      Fantasy: "Fantasy", 
-      Romance: "Romance", 
-      ScienceFiction: "Science Fiction", 
-      HistoricalFiction: "Historical Fiction",
-      SuspenseThriller: "Suspense / Thriller",
-      Drama: "Drama", 
-      Horror: "Horror", 
-      Poetry: "Poetry", 
-      GraphicNovel: "Graphic Novel", 
-      YoungAdult: "Young Adult", 
-      ChildrensBook: "Children's Book", 
-      Comic: "Comic", 
-      MemoirAutobiography: "Memoir Autobiography", 
-      Biography: "Biography",
-      FoodDrink: "Food & Drink", 
-      ArtPhotography: "Art / Photography", 
-      SelfHelp: "Self Help",
-      History: "History", 
-      Travel: "Travel", 
-      TrueCrime: "True Crime", 
-      ScienceTechnology: "Science / Technology", 
-      HumanitiesSocialSciences: "Humanities / Social Sciences", 
-      Essay: "Essay",
-      Guide: "Guide",
-      ReligionSpirituality: "Religion / Spirituality", 
-      Other: "Other", 
+      title: "4-Title",
+      author: "4-Author",
+      rating: "4-Rating",
+      dateCompleted: "4-Date Completed",
+      Fiction: "1-Fiction",
+      NonFiction: "2-Non-Fiction",
+      ActionAdventure: "1-Action / Adventure",
+      Comedy: "0-Comedy", 
+      CrimeMystery: "1-Crime / Mystery", 
+      Fantasy: "1-Fantasy", 
+      Romance: "1-Romance", 
+      ScienceFiction: "1-Science Fiction", 
+      HistoricalFiction: "1-Historical Fiction",
+      SuspenseThriller: "1-Suspense / Thriller",
+      Drama: "1-Drama", 
+      Horror: "1-Horror", 
+      Poetry: "0-Poetry", 
+      GraphicNovel: "1-Graphic Novel", 
+      YoungAdult: "1-Young Adult", 
+      ChildrensBook: "1-Children's Book", 
+      Comic: "1-Comic", 
+      MemoirAutobiography: "2-Memoir / Autobiography", 
+      Biography: "2-Biography",
+      FoodDrink: "2-Food & Drink", 
+      ArtPhotography: "2-Art / Photography", 
+      SelfHelp: "2-Self Help",
+      History: "2-History", 
+      Travel: "2-Travel", 
+      TrueCrime: "2-True Crime", 
+      ScienceTechnology: "2-Science / Technology", 
+      HumanitiesSocialSciences: "2-Humanities / Social Sciences", 
+      Essay: "2-Essay",
+      Guide: "2-Guide",
+      ReligionSpirituality: "2-Religion / Spirituality", 
+      Other: "0-Other", 
     };
 
     useEffect(() => {
@@ -271,9 +273,15 @@ function ViewDB() {
     };
 
     const generateRows = (key: string) => {
-      console.log(key);
       const typedKey = key as DataRowKey;
-      return (<TableElement handleSort={handleSort} sortDir={sortDirection[typedKey]} key={typedKey}>{tableElementNames[typedKey]}</TableElement>);
+      const classifier = Number(tableElementNames[typedKey].charAt(0));
+
+      // If classifier === 4, return TableElement (because this is nongenre). If displayGenres === 3, that means display no genres, so return.
+      // If classifier & displayGenres aren't 0 (0 signifies display all genres) and doesn't equal displayGenres value, then also return (this would mean display is Fiction & classifier Non-Fiction, or vice versa)
+      if(classifier !== 4 && (displayGenres === 3 || (classifier !== 0 && displayGenres !== 0 && displayGenres !== classifier)))
+        return;
+      else
+        return (<TableElement handleSort={handleSort} sortDir={sortDirection[typedKey]} key={typedKey}>{tableElementNames[typedKey].substring(2)}</TableElement>);
     }
     
     return(
@@ -288,37 +296,6 @@ function ViewDB() {
                         <tr>
                             <th scope="col" className="text-center"><span className="align-middle">#</span></th>
                             {Object.keys(tableElementNames).map((key) => generateRows(key))}
-                            {/*<th scope="col" className="text-center">
-                              <span className="align-middle">Title</span>
-                              <button type="button" className="btn btn-sm btn-secondary float-end" aria-label="Sort" onClick={() => handleSort("title")}>
-                                <b>{sortDirection.title === 1 ? "↓" : "↑"}</b>
-                              </button>
-                            </th>
-                            <th scope="col" className="text-center">
-                              <span className="align-middle">Author(s)</span>
-                              <button type="button" className="btn btn-sm btn-secondary float-end" aria-label="Sort" onClick={() => handleSort("author")}>
-                                <b>{sortDirection.author === 1 ? "↓" : "↑"}</b>
-                              </button>
-                            </th>
-                            <th scope="col" className="text-center">
-                              <span className="align-middle">Rating</span>
-                              <button type="button" className="btn btn-sm btn-secondary float-end" aria-label="Sort" onClick={() => handleSort("rating")}>
-                                <b>{sortDirection.rating === 1 ? "↓" : "↑"}</b>
-                              </button>
-                            </th>
-                            <th scope="col" className="text-center">
-                              <span className="align-middle">Genre(s)</span>
-                              <button type="button" className="btn btn-sm btn-secondary float-end" aria-label="Sort" onClick={() => handleSort("genres")}>
-                                <b>{sortDirection.genres === 1 ? "↓" : "↑"}</b>
-                              </button>
-                            </th>
-                            <th scope="col" className="text-center">
-                              <span className="align-middle">Date Completed</span>
-                              <button type="button" className="btn btn-sm btn-secondary float-end" aria-label="Sort" onClick={() => handleSort("dateCompleted")}>
-                                <b>{sortDirection.dateCompleted === 1 ? "↓" : "↑"}</b>
-                              </button>
-                            </th>
-                            <th scope="col" className="text-center"></th>*/}
                         </tr>
                     </thead>
                     <tbody>
@@ -329,8 +306,38 @@ function ViewDB() {
                                 <td>{row.title}</td>
                                 <td>{row.author}</td>
                                 <td>{row.rating || "N/A"}</td>
-                                <td>{row.dateCompleted ? format(row.dateCompleted, 'MMMM dd, yyyy hh:mm a') : "N/A"}</td>
-                                {/* TODO: INSERT GENRES */}
+                                <td>{row.dateCompleted ? format(row.dateCompleted, 'MMMM dd, yyyy hh:mm a') : "N/A"}</td>   {/* displayGenres = 0 is all, 1 is fiction, 2 is nonfiction, 3 is none*/}
+                                {(displayGenres === 0 || displayGenres === 1) && <td>{row.Fiction}</td>}                    {/* Note: Some genres are both fiction & nonfiction*/}
+                                {(displayGenres === 0 || displayGenres === 2) && <td>{row.NonFiction}</td>}
+                                {(displayGenres === 0 || displayGenres === 1) && <td>{row.ActionAdventure}</td>}
+                                {(displayGenres !== 3) && <td>{row.Comedy}</td>}
+                                {(displayGenres === 0 || displayGenres === 1) && <td>{row.CrimeMystery}</td>}
+                                {(displayGenres === 0 || displayGenres === 1) && <td>{row.Fantasy}</td>}
+                                {(displayGenres === 0 || displayGenres === 1) && <td>{row.Romance}</td>}
+                                {(displayGenres === 0 || displayGenres === 1) && <td>{row.ScienceFiction}</td>}
+                                {(displayGenres === 0 || displayGenres === 1) && <td>{row.HistoricalFiction}</td>}
+                                {(displayGenres === 0 || displayGenres === 1) && <td>{row.SuspenseThriller}</td>}
+                                {(displayGenres === 0 || displayGenres === 1) && <td>{row.Drama}</td>}
+                                {(displayGenres === 0 || displayGenres === 1) && <td>{row.Horror}</td>}
+                                {(displayGenres !== 3) && <td>{row.Poetry}</td>}
+                                {(displayGenres !== 3) && <td>{row.GraphicNovel}</td>}
+                                {(displayGenres !== 3) && <td>{row.YoungAdult}</td>}
+                                {(displayGenres !== 3) && <td>{row.ChildrensBook}</td>}
+                                {(displayGenres !== 3) && <td>{row.Comic}</td>}
+                                {(displayGenres === 0 || displayGenres === 2) && <td>{row.MemoirAutobiography}</td>}
+                                {(displayGenres === 0 || displayGenres === 2) && <td>{row.Biography}</td>}
+                                {(displayGenres === 0 || displayGenres === 2) && <td>{row.FoodDrink}</td>}
+                                {(displayGenres === 0 || displayGenres === 2) && <td>{row.ArtPhotography}</td>}
+                                {(displayGenres === 0 || displayGenres === 2) && <td>{row.SelfHelp}</td>}
+                                {(displayGenres === 0 || displayGenres === 2) && <td>{row.History}</td>}
+                                {(displayGenres === 0 || displayGenres === 2) && <td>{row.Travel}</td>}
+                                {(displayGenres === 0 || displayGenres === 2) && <td>{row.TrueCrime}</td>}
+                                {(displayGenres === 0 || displayGenres === 2) && <td>{row.ScienceTechnology}</td>}
+                                {(displayGenres === 0 || displayGenres === 2) && <td>{row.HumanitiesSocialSciences}</td>}
+                                {(displayGenres === 0 || displayGenres === 2) && <td>{row.Essay}</td>}
+                                {(displayGenres === 0 || displayGenres === 2) && <td>{row.Guide}</td>}
+                                {(displayGenres === 0 || displayGenres === 2) && <td>{row.ReligionSpirituality}</td>}
+                                {(displayGenres !== 3) && <td>{row.Other}</td>}
                                 <td className="text-center"><button type="button" className="btn btn-close" aria-label="Close" 
                                 onClick={() => {
                                     setBookToRemove({title: row.title, author: row.author});
@@ -340,9 +347,14 @@ function ViewDB() {
                         ))}
                     </tbody>
                 </table>
-                <br></br>
-                <h5>Entries are currently defaultly sorted by recency, with most recent entries at the top. Use the arrow buttons to sort by any of the categories.</h5>
-                <br></br>
+                <br />
+                <Radio id="no-genres" handleChange={() => setDisplayGenres(3)} checked={displayGenres === 3}>Show No Genres</Radio>
+                <Radio id="all-genres" handleChange={() => setDisplayGenres(0)} checked={displayGenres === 0}>Show All Genres</Radio>
+                <Radio id="fiction-genres" handleChange={() => setDisplayGenres(1)} checked={displayGenres === 1}>Show Only Fiction Genres</Radio>
+                <Radio id="nonfiction-genres" handleChange={() => setDisplayGenres(2)} checked={displayGenres === 2}>Show Only Non-Fiction Genres</Radio>
+                <br /><br />
+                <h5>Entries are currently defaultly sorted by recency, with most recent entries at the top. Use the arrow buttons to sort by any of the categories!</h5>
+                <br />
                 <h5>To update an entry, you must remove it and re-add it.</h5>
             </div>
             {removeModalVisible && 
