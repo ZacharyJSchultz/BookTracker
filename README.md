@@ -1,5 +1,7 @@
 # BookTracker
 
+## Note: This project is currently under development to improve the underlying functionality; it should be finished soon.
+
 ![View DB Screenshot](/screenshots/view_db.png?raw=true)
 
 Author: [Zachary Schultz](https://www.linkedin.com/in/~zachary/) | zjs32@pitt.edu
