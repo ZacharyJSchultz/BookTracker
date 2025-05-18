@@ -5,7 +5,7 @@ function NavBar({ setAlertVisible } : { setAlertVisible: React.Dispatch<React.Se
     const [selectedIndex, setSelectedIndex] = useState(-1);
     
     return (
-        <nav className="navbar navbar-expand-sm navbar-light bg-primary">
+        <nav className="navbar navbar-expand-sm navbar-light bg-primary" style={{position: "fixed", top: 0, left: 0, width: "100%", zIndex: 1000}}>
             <div className="container-fluid">
                 <Link to="" className="navbar-brand" style={{color:"white", fontWeight:"bold"}}>BookTracker</Link>
                 <ul className="navbar-nav">

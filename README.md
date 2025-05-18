@@ -52,6 +52,30 @@ To run the container, use Docker Desktop or the command: ```docker container sta
 
 <b>Note:</b> All times are stored in EST (America/New_York), no matter where the program is run from. Furthermore, times are all stored in 24-hour time.
 
+## Design
+
+For this app, I am chiefly designing it more as a model for a much larger, full-fledged application, as opposed to optimizing its current use.
+Essentially, I am designing it with scaling (to millions or even billions of books, and countless users) prioritized over usability. However, as of now, the application only supports a single user, and there is no Books database populated with billions of entries to pull from.
+
+For instance, in the current design, the user cannot remove a book from the Books table once it has been added, nor can they alter previously submitted genres for a book (because in a theoretical application, the user would have no control over the Books table, nor the genres it is classified as. But as I don't have a database to pull Books from, I rely on the users to manually input Books and Genres).
+
+### Database
+
+The database consists of four primary tables: Books, Genres, BookLog, and BookGenres, adhering to BCNF and following good normalization practices. 
+
+- The Books table consists of book_id, title, and author attributes, where the (title, author) pair must be unique -- serving as a storage for only Books (no user information)
+- The Genres table consists of (genre_id, genre_name) pairs -- storing the name of each genre and a numerical ID associated with it. As of now, these are predefined
+- The BookLog table stores user information, containing a book_id, rating, and the date completed
+- The BookGenres table houses (book_id, genre_id) pairs, storing the genres for each book. One book can have multiple genres.
+
+### Application (System Design)
+
+This application consists of three parts: a front-end React/TypeScript website, a back-end node.js server, and a MySQL database hosted on a Docker container. As I would rather not pay for hosting at this current time, each part must be hosted on the user's system (however, it would not be difficult to scale this application to online hosting).
+
+- The front-end website serves as the user's gateway into the application, allowing them to add, remove, and view their entries
+- The back-end server bridges the front-end to the database, transmitting information to and from each side. Adding and removing books, querying the user's current logged entries -- this server handles all the back-end logic.
+- The Docker container / MySQL database provides persistent storage, maintaining the user's information even if the app is shut down.
+
 ## Screenshots
 
 #### Home Page

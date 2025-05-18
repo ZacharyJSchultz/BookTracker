@@ -29,6 +29,7 @@ function App() {
   return (
     <>
         <NavBar setAlertVisible = {setAlertVisible} />
+        <br />
         {currLoc}
         {/*<h1>{bookData}</h1>*/}
     </>

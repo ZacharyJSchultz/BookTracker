@@ -9,13 +9,14 @@ CREATE TABLE Books(
     book_id INT UNIQUE NOT NULL AUTO_INCREMENT,
 	title VARCHAR(50),
     author VARCHAR(50),
-    CONSTRAINT PK_Books PRIMARY KEY (title, author)
+    CONSTRAINT PK_Books PRIMARY KEY (book_id),
+    CONSTRAINT Unique_Books UNIQUE (title, author)
 );
 
 CREATE TABLE Genres(
 	genre_id INT UNIQUE NOT NULL AUTO_INCREMENT,
-    genre_name VARCHAR(50) NOT NULL,
-    CONSTRAINT PK_Genres PRIMARY KEY genre_name
+    genre_name VARCHAR(50) UNIQUE NOT NULL,
+    CONSTRAINT PK_Genres PRIMARY KEY (genre_id)
 );
 
 CREATE TABLE BookGenres(
@@ -28,10 +29,10 @@ CREATE TABLE BookLog(
 	book_id INT,
     rating TINYINT DEFAULT NULL,
     dateCompleted DATETIME,
-    CONSTRAINT PK_BookLog PRIMARY KEY book_id
+    CONSTRAINT PK_BookLog PRIMARY KEY (book_id)
 );
 
-INSERT INTO Genres VALUES
+INSERT INTO Genres (genre_name) VALUES
     ("Fiction"),
     ("Non-Fiction"),
     ("Action / Adventure"),

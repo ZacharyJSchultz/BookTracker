@@ -1,10 +1,10 @@
 import React, { ReactNode } from 'react'
-import { DataRow, DataRowKey } from './ViewDB';
+import { FormattedDataRow, FormattedDataRowKey } from './ViewDB'
 
 interface Props {
-    handleSort: (sortProp: DataRowKey) => void,
+    handleSort: (sortProp: FormattedDataRowKey) => void,
     sortDir: number,
-    key: keyof DataRow,
+    key: keyof FormattedDataRow,
     children: ReactNode,
 }
 

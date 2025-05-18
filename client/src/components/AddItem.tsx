@@ -48,7 +48,8 @@ function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, se
         author: "",
         rating: 0,
     });
-    const [response, setResponse] = useState("");           // Used to store response from server after submitting form (displayed in alert as strongtext)
+    const [responseText, setResponseText] = useState("");           // Used to store response from server after submitting form (displayed in alert as strongtext)
+    const [responseCode, setResponseCode] = useState(-1);           // Used to determine specific error (500 = general, 501 = duplicate entry)
     const [nonFiction, setNonFiction] = useState(false);    // nonFiction and fiction used to display subgenres for the respective genre
     const [fiction, setFiction] = useState(false);
 
@@ -136,9 +137,11 @@ function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, se
             }
 
             // Check server's response, and set that response to the state variable (to be used in the alert)
-            const res = await response.text()
+            const resText = await response.text()
+            const resCode = await response.status;
 
-            setResponse(res)
+            setResponseText(resText);
+            setResponseCode(resCode);
             setAlertVisible(true);
         } catch (e) {
             console.error("Error submitting form:", e);
@@ -149,11 +152,15 @@ function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, se
         <>
             {/* Display alert if alertVisible true (if form submitted). On close, hide alert and reset response */}
             {alertVisible && 
-                <Alert alertType={response.includes("Error") ? "alert-danger" : "alert-primary"} strongtext={response} onClose={() => {setAlertVisible(false); setResponse("")}}>
+                <Alert alertType={responseText.includes("Error") ? "alert-danger" : "alert-primary"} strongtext={responseText} onClose={() => {setAlertVisible(false); setResponseText(""); setResponseCode(-1)}}>
                     {
-                        response.includes("Error") ? 
-                        "Double-check your spelling and verify that this book isn't already in the database! To try again, click 'Add Books' or the 'X' on the right!" : 
-                        "Click 'Add Books' or the 'X' on the right to add another item!"
+                        responseCode < 500 ? 
+                            "Click 'Add Books' or the 'X' on the right to add another item!" : 
+                            (
+                                responseCode === 501 ? 
+                                    "It appears that you've already read this book. If you assigned it any new genres, they have been updated in the database. If you'd like to re-add this book to your log or re-rate it, please remove the previous entry and then try again." : 
+                                    "Double-check your spelling and verify that this book isn't already in the database! To try again, click 'Add Books' or the 'X' on the right!"
+                            ) 
                     }
                 </Alert>}
             
