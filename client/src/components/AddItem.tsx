@@ -4,6 +4,7 @@ import Radio from "./Radio";
 import { FormEvent, useState } from "react";
 import React from 'react';
 
+// TODO: Maybe get this from server?
 type FormData = {
     title: string;
     author: string;

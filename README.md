@@ -64,7 +64,7 @@ For instance, in the current design, the user cannot remove a book from the Book
 The database consists of four primary tables: Books, Genres, BookLog, and BookGenres, adhering to BCNF and following good normalization practices. 
 
 - The Books table consists of book_id, title, and author attributes, where the (title, author) pair must be unique -- serving as a storage for only Books (no user information)
-- The Genres table consists of (genre_id, genre_name) pairs -- storing the name of each genre and a numerical ID associated with it. As of now, these are predefined
+- The Genres table consists of (genre_id, genre_name, fiction, nonfiction) entries -- storing the name of each genre, a numerical ID associated with it, and 2 booleans consisting of whether the genre applies to fiction and nonfiction genres. As of now, these are predefined
 - The BookLog table stores user information, containing a book_id, rating, and the date completed
 - The BookGenres table houses (book_id, genre_id) pairs, storing the genres for each book. One book can have multiple genres.
 
