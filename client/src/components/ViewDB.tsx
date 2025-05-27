@@ -5,44 +5,6 @@ import Alert from './Alert';
 import TableElement from './TableElement';
 import Radio from './Radio';
 
-/*export interface FormattedDataRow {
-    title: string
-    author: string
-    rating: number
-    dateCompleted: string
-    Fiction: boolean;
-    NonFiction: boolean;
-    ActionAdventure: boolean;
-    Comedy: boolean;
-    CrimeMystery: boolean;
-    Fantasy: boolean;
-    Romance: boolean;
-    ScienceFiction: boolean;
-    HistoricalFiction: boolean;
-    SuspenseThriller: boolean;
-    Drama: boolean;
-    Horror: boolean;
-    Poetry: boolean;
-    GraphicNovel: boolean;
-    YoungAdult: boolean;
-    ChildrensBook: boolean;
-    Comic: boolean;
-    MemoirAutobiography: boolean;
-    Biography: boolean;
-    FoodDrink: boolean;
-    ArtPhotography: boolean;
-    SelfHelp: boolean;
-    History: boolean;
-    Travel: boolean;
-    TrueCrime: boolean;
-    ScienceTechnology: boolean;
-    HumanitiesSocialSciences: boolean;
-    Essay: boolean;
-    Guide: boolean;
-    ReligionSpirituality: boolean;
-    Other: boolean;
-}*/
-
 export interface FormattedDataRow {
     title: string
     author: string
@@ -217,7 +179,6 @@ function ViewDB() {
         - Get sorting working
         - Test/fix Removing
         - See if I can get the cols with the genres smaller (and change the Yes/No to a green check/red x)
-        - Fix bug (TODO down below)
     */
 
     const handleRemove = async () => {
@@ -230,7 +191,7 @@ function ViewDB() {
         setResponseOk(response.ok);
         setResponseText(await response.text());
         if (!response.ok) {
-          console.log("Error removing entry!");
+          console.error("Error removing entry!");
         }
         // Originally had this conditional as &&, however the way filter() works is that it removes any item where the condition returns false. 
         // So if title != remove.title && author == remove.author (meaning it shouldn't be removed, as only the author matches), the condition 
@@ -350,13 +311,10 @@ function ViewDB() {
                                   const [name, fic, nonfic] = entryArr.values();
                                   const typedKey = name as FormattedDataRowKey;
 
-                                  console.log(id, "|", name);
-                                  console.log("genres:", row.genres.map((r) => genreMap.get(r)?.[0]));
-
                                   {/* displayGenres = 0 is all, 1 is fiction, 2 is nonfiction, 3 is none*/}
                                   if ( (displayGenres === 0) || (fic && displayGenres === 1) || (nonfic && displayGenres === 2) )
                                   {
-                                    if (row.genres.includes(id))  // TODO: ERROR WHEN ADDING 2 BOOKS IN A ROW: FICTION AUTO SELECTED ON RADIO, BUT IT DOESN'T GET SENT TO DB!
+                                    if (row.genres.includes(id))
                                       return <td>Yes</td>;
                                     else
                                       return <td>No</td>;
