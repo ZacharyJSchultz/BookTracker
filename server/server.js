@@ -141,7 +141,7 @@ async function main() {
 
             // Add to BookLog
             try {
-                const [insertBookLog] = await con.execute(insertBookLogQuery, [bookID, formData.rating]);
+                const [insertBookLog] = await con.execute(insertBookLogQuery, [bookID, formData.rating || 0]);
                 
                 console.log("Successfully written to BookLog:", 
                     "\nBook_ID:", bookID, 

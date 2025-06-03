@@ -54,8 +54,6 @@ function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, se
     const [nonFiction, setNonFiction] = useState(false);    // nonFiction and fiction used to display subgenres for the respective genre
     const [fiction, setFiction] = useState(false);
 
-    console.log(fiction, nonFiction);
-
     // Handle changes in form to update SetFormData (can't handle in handleSubmit because that is an async function, so formData could be reset before being sent)
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         // ID = the html ID of the value changed. Value = new value in that field. Basically, only update the field in the state variable that was modified

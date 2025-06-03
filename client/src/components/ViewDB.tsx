@@ -1,19 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { format, parseISO, isBefore, isAfter } from 'date-fns';
 import Modal from './Modal';
 import Alert from './Alert';
-import TableElement from './TableElement';
+import TableHeaderElement from './TableHeaderElement';
 import Radio from './Radio';
 
 export interface FormattedDataRow {
+    display_id: number  // This is different from the book_id, as the book_id can have gaps (due to how MySQL auto increment works)
     title: string
     author: string
     rating: number
     dateCompleted: string
     genres: number[]
 }
-
-export type FormattedDataRowKey = keyof FormattedDataRow;
 
 export interface UnformattedDataRow {
   book_id: number
@@ -24,49 +23,12 @@ export interface UnformattedDataRow {
   dateCompleted: string
 }
 
-interface SortDir {
-  title: number
-  author: number
-  rating: number
-  dateCompleted: number
-  Fiction: number;
-  NonFiction: number;
-  ActionAdventure: number;
-  Comedy: number;
-  CrimeMystery: number;
-  Fantasy: number;
-  Romance: number;
-  ScienceFiction: number;
-  HistoricalFiction: number;
-  SuspenseThriller: number;
-  Drama: number;
-  Horror: number;
-  Poetry: number;
-  GraphicNovel: number;
-  YoungAdult: number;
-  ChildrensBook: number;
-  Comic: number;
-  MemoirAutobiography: number;
-  Biography: number;
-  FoodDrink: number;
-  ArtPhotography: number;
-  SelfHelp: number;
-  History: number;
-  Travel: number;
-  TrueCrime: number;
-  ScienceTechnology: number;
-  HumanitiesSocialSciences: number;
-  Essay: number;
-  Guide: number;
-  ReligionSpirituality: number;
-  Other: number;
-}
-
 interface BookKey {
     title: string
     author: string
 }
 
+// Used only for incoming data
 interface GenreRow {
   genre_id: number
   genre_name: string
@@ -78,7 +40,6 @@ interface GenreRow {
 type IncomingData = [UnformattedDataRow[], GenreRow[]]
 
 function ViewDB() {
-    const [unformatted, setUnformattedData] = useState<UnformattedDataRow[]>([]);
     const [data, setData] = useState<FormattedDataRow[]>([]);
     const [removeModalVisible, setRemoveModalVisible] = useState(false);
     const [removeAlertVisible, setRemoveAlertVisible] = useState(false);
@@ -86,46 +47,11 @@ function ViewDB() {
     const [responseText, setResponseText] = useState("");
     const [bookToRemove, setBookToRemove] = useState<BookKey>({title: "", author: ""});
     const [displayGenres, setDisplayGenres] = useState(0);  // 0 = all genres, 1 = fiction genres, 2 = nonfiction genres, 3 = no genres
-    const [genreMap, setGenreMap] = useState<Map<number, [string, boolean, boolean]>>(new Map());
-
-    // Determines whether the sort direction will sort ascending (Z-A) or descending (A-Z). 1 = descending, -1 = ascending
-    const [sortDirection, setSortDirection] = useState<SortDir>({
-      title: 1,
-      author: 1,
-      rating: 1,
-      dateCompleted: 1,
-      Fiction: 1,
-      NonFiction: 1,
-      ActionAdventure: 1,
-      Comedy: 1,
-      CrimeMystery: 1,
-      Fantasy: 1,
-      Romance: 1,
-      ScienceFiction: 1,
-      HistoricalFiction: 1,
-      SuspenseThriller: 1,
-      Drama: 1,
-      Horror: 1,
-      Poetry: 1,
-      GraphicNovel: 1,
-      YoungAdult: 1,
-      ChildrensBook: 1,
-      Comic: 1,
-      MemoirAutobiography: 1,
-      Biography: 1,
-      FoodDrink: 1,
-      ArtPhotography: 1,
-      SelfHelp: 1,
-      History: 1,
-      Travel: 1,
-      TrueCrime: 1,
-      ScienceTechnology: 1,
-      HumanitiesSocialSciences: 1,
-      Essay: 1,
-      Guide: 1,
-      ReligionSpirituality: 1,
-      Other: 1,
-    });
+    const [genreMap, setGenreMap] = useState<Map<number, [string, boolean, boolean]>>(new Map());   // Maps id to [name, fic, nonfic] array
+    const [currSorted, setCurrSorted] = useState<{key: string | null; asc: boolean}>({
+      key: null,
+      asc: false
+    })
 
     useEffect(() => {
         fetch("http://localhost:8000/view-db", {
@@ -141,11 +67,13 @@ function ViewDB() {
         .catch((e) => console.error("Error fetching table:", e));
     }, []);
 
+    // This function transforms the incoming data from the server (consisting of both the database entries and the genres table)
+    // into two distinct, properly formatted data structures (genreMap and data, respectively).
     const formatData = (data : IncomingData) => {
       //console.log(data);
 
-      // This code used reduce to 'reduce' the array on the outside of the {} entries, then turns each entry in the array (consisting of
-      // {number: string} pairs) into a single dictionary of (number, string) pairs
+      // This code uses reduce to 'reduce' the array on the outside of the {} genre entries, then turns each entry in the array
+      // (consisting of {number, string, bool, bool]} pairs) into a single dictionary of (number, [string, bool, bool]) pairs
       setGenreMap(data[1].reduce((acc, obj : GenreRow) => {
         const [id, name, fic, nonfic] = Object.values(obj);
         acc.set(Number(id), [name, Boolean(fic), Boolean(nonfic)]);
@@ -155,22 +83,37 @@ function ViewDB() {
       // For each row of the table, create a map element if one doesn't exist for this bookID. Then add the genre_id to the genres of the map entry
       const tempData: FormattedDataRow[] = [];
 
-      data[0].map(row => {
-        const id = row.book_id;
+      // MySQL AUTO INCREMENT starts at 1 by default. Doing it this way leaves a wasted space at tempData[0] that will never be used, so 
+      // since the book_id doesn't matter (as long as it's unique), I subtract one to have the array start at 0.
+
+          
+      /* Note: Currently, since MySQL AUTO INCREMENT is used, if a transaction fails (i.e., the user enters something wrong), the book_id
+      *  still increments. This means failed transactions advance the book_id, which can result in gaps in ID. Since the book_id is used 
+      *  when initializing data, and I'd rather not show gaps in IDs to the user (I'd rather the numbers be a count that maintains book order 
+      *  rather than an arbitrary ID), I created another ID, the display_id, which is initialized in this function as a simple count (the
+      *  order will still be correct, because SQL queries default to ordering by recency). I could've instead not used AUTO INCREMENT, but
+      *  this would require keeping track of the number of total successful transactions and maintaining a constant counter (which is 
+      *  unnecessary complexity) or read the total entries from the database before adding (but this adds an unnecessary transaction
+      *  and overhead, which could be significant with a large enough database)
+      */ 
+      let count = 1;
+      data[0].reverse().map(row => {  // reverse() is used so that the entries start with the oldest (and thus, the oldest entry is #1)
+        const id = row.book_id - 1;
         if (!(id in tempData)) {
           tempData[id] = {
+            display_id: count,
             title: row.title,
             author: row.author,
             rating: row.rating,
             dateCompleted: row.dateCompleted,
             genres: []
           };
+          count++;
         }
 
         // ! is TypeScript assertion that this variable cannot be null / undefined
         tempData[id]!["genres"].push(row.genre_id);
-      }, new Map<number, FormattedDataRow>());
-
+      });
       setData(tempData);
     }
 
@@ -178,6 +121,7 @@ function ViewDB() {
       TODO: TODO LIST
         - Get sorting working
         - Test/fix Removing
+        - useCallback for all functions passed to children across project
         - See if I can get the cols with the genres smaller (and change the Yes/No to a green check/red x)
     */
 
@@ -204,7 +148,15 @@ function ViewDB() {
         setRemoveAlertVisible(true);
     };
 
-    const handleSort = (sortProp: FormattedDataRowKey) => {
+    // Update currSorted to whatever column is being sorted (passed to TableHeaderElement components)
+    const handleSort = (sortKey: string) => {
+      setCurrSorted((prev) => {
+        return {
+          key: sortKey,
+          asc: prev.key === sortKey ? !prev.asc : true
+        }
+      })
+      
       /*const sorted = [...data].sort((a, b) => {
         if (sortProp === "dateCompleted") {
           let aDate = parseISO(a[sortProp])
@@ -255,16 +207,93 @@ function ViewDB() {
         [sortProp]: -sortDirection[sortProp]
     });
 
-      /*for(let i = 0; i < data.length; i++) {
+      for(let i = 0; i < data.length; i++) {
         console.log(data[i]);
-      }*/
-      //setData(sorted); TODO UNCOMMENT
-      /*console.log("------------");
+      }
+      setData(sorted);
+      console.log("------------");
       for(let i = 0; i < data.length; i++) {
         console.log(data[i]);
       }*/
-    };
-    
+    }
+
+    // Actually change `data` after a change in currSorted
+    const sortData = useEffect(() => {
+      if (!currSorted.key) return;
+
+      const sortedData = [...data].sort((a, b) => {
+        if (currSorted.key === "dateCompleted") {
+          let aDate = parseISO(a.dateCompleted)
+          let bDate = parseISO(b.dateCompleted)
+
+          if (isBefore(aDate, bDate))
+            return currSorted.asc ? -1 : 1;
+          else if (isAfter(aDate, bDate)) 
+            return currSorted.asc ? 1 : -1;
+          else
+            return 0
+        }
+        else if (currSorted.key === "rating") {   // TODO: Doesn't appear to be working (at least for N/A sorting)
+          // Always push N/A to the bottom of the sort
+          if (a.rating === 0)
+            return 1
+          else if (b.rating === 0)
+            return -1
+
+          if (a.rating < b.rating)
+            return currSorted.asc ? -1 : 1;
+          else if (a.rating > b.rating)
+            return currSorted.asc ? 1 : -1;
+          else
+            return 0
+        }
+        else if (currSorted.key === "title" || currSorted.key === "author") {
+          let aLower = a[currSorted.key].toString().toLowerCase();
+          let bLower = b[currSorted.key].toString().toLowerCase();
+
+          // Always push N/A to the bottom of the sort
+          if (aLower === "")
+            return 1
+          else if (bLower === "")
+            return -1
+
+          if (aLower < bLower)
+            return currSorted.asc ? -1 : 1;
+          else if (aLower > bLower)
+            return currSorted.asc ? 1 : -1;
+          else
+            return 0
+        }
+        // If sorting by genre. In this case, if a's genres array contains the genre_id but b's doesn't, then we want to return 
+        // negative to indicate that a comes before b (and vice versa if b's contains but a's doesn't). If both contain
+        // genre_id, then return 0, indicating that both elements are equal in terms of sorting
+        else {  // TODO: Doesn't appear to be working
+          // Rather than trying to backwards convert the key (a string, e.g., "Fiction") into its ID, I will instead convert
+          // the genre_ids to strings and compare (this saves time, as we don't have to search the entire genreMap)
+          let aGenres = a.genres.map(genre_id => {
+            genreMap.get(genre_id);
+          });
+          let bGenres = b.genres.map(genre_id => {
+            genreMap.get(genre_id);
+          });
+
+          // If the key is in both a and b, return 0 (equal)
+          if (currSorted.key! in aGenres && currSorted.key! in bGenres) // Asserting key as not null because we check at the top of the function
+            return 0;
+          // If key only in a, return -1 (push a to top, b bottom)
+          else if (currSorted.key! in aGenres)
+            return -1;
+          // If key only in b, return 1 (push b to top, a bottom)
+          else if (currSorted.key! in bGenres)
+            return 1;
+          // If key in neither, return 0 (equal)
+          else
+            return 0;
+        }
+      });
+      setData(sortedData);
+    }, [currSorted]);
+
     return(
         <>
             {removeAlertVisible && (
@@ -275,24 +304,27 @@ function ViewDB() {
                     <thead>
                         <tr>
                             <th scope="col" className="text-center"><span className="align-middle">#</span></th>
-                            {/* Map the hardcoded default elements to TableElements */}
-                            {([
-                              ["Title", true, true], 
-                              ["Author", true, true], 
-                              ["Rating", true, true], 
-                              ["Date Completed", true, true]
-                            ]).map(([name, fic, nonfic]) => {
-                              return <TableElement handleSort={handleSort} sortDir={1} key={(name as FormattedDataRowKey)}>{name}</TableElement>
+                            {/* Map the hardcoded default elements to TableHeaderElements*/}
+                            {[
+                              ["Title", "title"], 
+                              ["Author", "author"],
+                              ["Rating", "rating"],
+                              ["Date Completed", "dateCompleted"]]
+                              .map(([displayName, formattedDataRowKey]) => {
+                              return <TableHeaderElement 
+                                handleSort={handleSort} 
+                                sortDir={currSorted.key === formattedDataRowKey ? currSorted.asc : null} 
+                                colKey={(formattedDataRowKey)}>
+                                  {displayName}
+                              </TableHeaderElement>
                             })}
 
-                            {/* Map the (dynamic) genre elements to TableElements */}
+                            {/* Map the (dynamic) genre elements to TableHeaderElements */}
                             {genreMap && Array.from(genreMap.values())
                             .map(([name, fic, nonfic]) => {
-                              const typedKey = name as FormattedDataRowKey;
-
                               /* displayGenres = 0 is all, 1 is fiction, 2 is nonfiction, 3 is none*/
                               if ( (displayGenres === 0) || (fic && displayGenres === 1) || (nonfic && displayGenres === 2) )
-                                return <TableElement handleSort={handleSort} sortDir={1} key={typedKey}>{typedKey}</TableElement>;
+                                return <TableHeaderElement handleSort={handleSort} sortDir={currSorted.key === name ? currSorted.asc : null} colKey={name}>{name}</TableHeaderElement>;
                               else
                                 return;
                             })}
@@ -300,16 +332,17 @@ function ViewDB() {
                     </thead>
                     <tbody>
                         {/* Reverse the map so that newer entries are at the top (since they are ordered by dateCompleted). Slice it first to create shallow copy, and use length-1-index instead to preserve book_id */}
-                        {data.slice().reverse().map((row, index) => (
-                            <tr key={index}>
-                                <th scope="row">{data.length - 1 - index}</th>
+                        {data.slice().reverse().map((row) => (
+                            // For special cases, if row is ever somehow nonexistent / undefined
+                            row ? ( 
+                              <tr key={row.display_id}>
+                                <th scope="row">{row.display_id}</th>
                                 <td>{row.title}</td>
                                 <td>{row.author}</td>
                                 <td>{row.rating || "N/A"}</td>
                                 <td>{row.dateCompleted ? format(row.dateCompleted, 'MMMM dd, yyyy hh:mm a') : "N/A"}</td>
                                 {genreMap && [...genreMap.entries()].map(([id, entryArr]) => {
                                   const [name, fic, nonfic] = entryArr.values();
-                                  const typedKey = name as FormattedDataRowKey;
 
                                   {/* displayGenres = 0 is all, 1 is fiction, 2 is nonfiction, 3 is none*/}
                                   if ( (displayGenres === 0) || (fic && displayGenres === 1) || (nonfic && displayGenres === 2) )
@@ -327,7 +360,8 @@ function ViewDB() {
                                     setBookToRemove({title: row.title, author: row.author});
                                     setRemoveModalVisible(true);
                                 }} /></td>
-                            </tr>
+                              </tr>
+                            ) : null
                         ))}
                     </tbody>
                 </table>
