@@ -1,10 +1,10 @@
 import Alert from "./Alert";
 import Checkbox from "./Checkbox";
 import Radio from "./Radio";
-import { FormEvent, useState } from "react";
+import { FormEvent, useCallback, useState } from "react";
 import React from 'react';
 
-// TODO: Maybe get this from server?
+// TODO: Get this from server!
 type FormData = {
     title: string;
     author: string;
@@ -55,7 +55,7 @@ function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, se
     const [fiction, setFiction] = useState(false);
 
     // Handle changes in form to update SetFormData (can't handle in handleSubmit because that is an async function, so formData could be reset before being sent)
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         // ID = the html ID of the value changed. Value = new value in that field. Basically, only update the field in the state variable that was modified
         const { id, value, checked } = e.target;
 
@@ -99,7 +99,7 @@ function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, se
             }
         }
         //console.log(formData);
-    }
+    }, [])
 
     // Handle submitting of form to send to server and display alert
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -230,6 +230,10 @@ function AddItem({ alertVisible, setAlertVisible } : { alertVisible: boolean, se
                                 <Checkbox id="Other" handleChange={handleChange}>Other</Checkbox>
                             </>}
                             {nonFiction && <>
+                                <Checkbox id="Comedy" handleChange={handleChange}>Comedy</Checkbox>
+                                <Checkbox id="Horror" handleChange={handleChange}>Horror</Checkbox>
+                                <Checkbox id="Poetry" handleChange={handleChange}>Poetry</Checkbox>
+                                <Checkbox id="ChildrensBook" handleChange={handleChange}>Children's Book</Checkbox>
                                 <Checkbox id="MemoirAutobiography" handleChange={handleChange}>Memoir / Autobiography</Checkbox>
                                 <Checkbox id="FoodDrink" handleChange={handleChange}>Food & Drink</Checkbox>
                                 <Checkbox id="ArtPhotography" handleChange={handleChange}>Art / Photography</Checkbox>

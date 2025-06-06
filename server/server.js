@@ -1,8 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2/promise");
-const fs = require("fs");
-const path = require("path");
+//const fs = require("fs");     // Used for testing querying with files
+//const path = require("path");
 const bodyParser = require("body-parser");  // For parsing submit-form JSON
 
 const app = express();

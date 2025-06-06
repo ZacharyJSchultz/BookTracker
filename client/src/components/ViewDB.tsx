@@ -5,6 +5,9 @@ import Alert from './Alert';
 import TableHeaderElement from './TableHeaderElement';
 import Radio from './Radio';
 
+// TODO: Idea: Add another mode/version of the table that, instead of having a col for each genre, instead lists all the genres for
+// an entry in a single "genres" column (like before). This mode could be switched to with a switch, possiblei n the navbar when viewDB is selected
+
 export interface FormattedDataRow {
     display_id: number  // This is different from the book_id, as the book_id can have gaps (due to how MySQL auto increment works)
     title: string
@@ -115,14 +118,18 @@ function ViewDB() {
         tempData[id]!["genres"].push(row.genre_id);
       });
       setData(tempData);
+
+      // currSorted set so that data defaults to descending by date (rather than descending), so newer entries are conveniently placed at the top of the table
+      setCurrSorted({
+        key: 'dateCompleted', 
+        asc: false
+      });
     }
 
     /*
       TODO: TODO LIST
-        - Get sorting working
+        - Resolve Add Item TODO
         - Test/fix Removing
-        - useCallback for all functions passed to children across project
-        - See if I can get the cols with the genres smaller (and change the Yes/No to a green check/red x)
     */
 
     const handleRemove = async () => {
@@ -134,18 +141,18 @@ function ViewDB() {
 
         setResponseOk(response.ok);
         setResponseText(await response.text());
-        if (!response.ok) {
+        if (!response.ok)
           console.error("Error removing entry!");
-        }
-        // Originally had this conditional as &&, however the way filter() works is that it removes any item where the condition returns false. 
-        // So if title != remove.title && author == remove.author (meaning it shouldn't be removed, as only the author matches), the condition 
-        // evaluates to (false && true), which returns false. Thus, this item would be removed. Thus, changing it to || means that the condition 
-        // returns true unless both booleans are false, in which case the item is removed. A little counter-intuitive to think that || means both 
-        // must be satisfied, but it makes sense (DeMorgan's Law in action!).
-        setData(data.filter(item => item.title !== bookToRemove.title || item.author !== bookToRemove.author));
-
-        setRemoveModalVisible(false);
-        setRemoveAlertVisible(true);
+        else
+          // Originally had this conditional as &&, however the way filter() works is that it removes any item where the condition returns false. 
+          // So if title != remove.title && author == remove.author (meaning it shouldn't be removed, as only the author matches), the condition 
+          // evaluates to (false && true), which returns false. Thus, this item would be removed. Thus, changing it to || means that the condition 
+          // returns true unless both booleans are false, in which case the item is removed. A little counter-intuitive to think that || means both 
+          // must be satisfied, but it makes sense (DeMorgan's Law in action!). Could have also done !(title == remove.title && author == remove.author)
+          setData(data.filter(item => item.title !== bookToRemove.title || item.author !== bookToRemove.author));
+        
+        setRemoveModalVisible(false);   // Hide modal
+        setRemoveAlertVisible(true);    // Display remove alert
     };
 
     // Update currSorted to whatever column is being sorted (passed to TableHeaderElement components)
@@ -233,7 +240,7 @@ function ViewDB() {
           else
             return 0
         }
-        else if (currSorted.key === "rating") {   // TODO: Doesn't appear to be working (at least for N/A sorting)
+        else if (currSorted.key === "rating") {
           // Always push N/A to the bottom of the sort
           if (a.rating === 0)
             return 1
@@ -241,9 +248,9 @@ function ViewDB() {
             return -1
 
           if (a.rating < b.rating)
-            return currSorted.asc ? -1 : 1;
-          else if (a.rating > b.rating)
             return currSorted.asc ? 1 : -1;
+          else if (a.rating > b.rating)
+            return currSorted.asc ? -1 : 1;
           else
             return 0
         }
@@ -267,28 +274,32 @@ function ViewDB() {
         // If sorting by genre. In this case, if a's genres array contains the genre_id but b's doesn't, then we want to return 
         // negative to indicate that a comes before b (and vice versa if b's contains but a's doesn't). If both contain
         // genre_id, then return 0, indicating that both elements are equal in terms of sorting
-        else {  // TODO: Doesn't appear to be working
+        else {
           // Rather than trying to backwards convert the key (a string, e.g., "Fiction") into its ID, I will instead convert
           // the genre_ids to strings and compare (this saves time, as we don't have to search the entire genreMap)
           let aGenres = a.genres.map(genre_id => {
-            genreMap.get(genre_id);
+            return genreMap.get(genre_id)?.[0];
           });
           let bGenres = b.genres.map(genre_id => {
-            genreMap.get(genre_id);
+            return genreMap.get(genre_id)?.[0];
           });
 
           // If the key is in both a and b, return 0 (equal)
-          if (currSorted.key! in aGenres && currSorted.key! in bGenres) // Asserting key as not null because we check at the top of the function
+          if (aGenres.includes(currSorted.key!) && bGenres.includes(currSorted.key!)) {// Asserting key as not null because we check at the top of the function
             return 0;
+          }
           // If key only in a, return -1 (push a to top, b bottom)
-          else if (currSorted.key! in aGenres)
-            return -1;
+          else if (aGenres.includes(currSorted.key!)) {
+            return  currSorted.asc ? 1 : -1;
+          }
           // If key only in b, return 1 (push b to top, a bottom)
-          else if (currSorted.key! in bGenres)
-            return 1;
+          else if (bGenres.includes(currSorted.key!)) {
+            return currSorted.asc ? -1 : 1;
+          }
           // If key in neither, return 0 (equal)
-          else
+          else {
             return 0;
+          }
         }
       });
       setData(sortedData);
@@ -300,7 +311,7 @@ function ViewDB() {
               <Alert alertType={`alert ${responseOk ? "alert-primary" : "alert-danger"}`} strongtext={responseText} onClose={() => setRemoveAlertVisible(false)}>{!responseOk && "Please try again."}</Alert>
             )}
             <div className="container mt-5">
-                <table className="table table-bordered table-hover">
+                <table className="table table-bordered table-hover">  {/* TODO: Maybe turn into component ? Try to abstract some stuff away if possible*/}
                     <thead>
                         <tr>
                             <th scope="col" className="text-center"><span className="align-middle">#</span></th>
@@ -330,9 +341,9 @@ function ViewDB() {
                             })}
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="align-middle">
                         {/* Reverse the map so that newer entries are at the top (since they are ordered by dateCompleted). Slice it first to create shallow copy, and use length-1-index instead to preserve book_id */}
-                        {data.slice().reverse().map((row) => (
+                        {data.map((row) => (
                             // For special cases, if row is ever somehow nonexistent / undefined
                             row ? ( 
                               <tr key={row.display_id}>
@@ -348,9 +359,9 @@ function ViewDB() {
                                   if ( (displayGenres === 0) || (fic && displayGenres === 1) || (nonfic && displayGenres === 2) )
                                   {
                                     if (row.genres.includes(id))
-                                      return <td>Yes</td>;
+                                      return <td className="text-center h2" style={{color:'green'}}>✓</td>;
                                     else
-                                      return <td>No</td>;
+                                      return <td className="text-center h4">❌</td>;
                                   }
                                   else
                                     return;
@@ -373,7 +384,7 @@ function ViewDB() {
                 <br /><br />
                 <h5>Entries are currently defaultly sorted by recency, with most recent entries at the top. Use the arrow buttons to sort by any of the categories!</h5>
                 <br />
-                <h5>To update an entry, you must remove it and re-add it.</h5>
+                <h5>For now, to update an entry, you must remove it and re-add it.</h5>
             </div>
             {removeModalVisible && 
               <Modal
