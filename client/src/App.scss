@@ -1,0 +1,50 @@
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+
+    .nav-inner-container {
+        color: white;
+        font-weight: bold;
+    }
+
+    .nav-link,
+    .navbar-brand {
+        color: inherit;
+        font-weight: 500;
+    }
+}
+
+.table-header-element-inner-div {
+    display: flex;
+    align-items: center;
+    min-width: 75px;
+    max-width: 250px;
+    overflow-wrap: anywhere;
+    word-wrap: break-word;
+    margin: 0 auto;
+
+    .sort-button {
+        height: 25px;
+        display: flex;
+        align-items: center;
+    }
+}
+
+.invalid-feedback {
+    color: red;
+}
+
+.large-font {
+    font-size: 1.5em;
+}
+
+.top-padding {
+    margin-top: 5px;
+}
+
+.checkmark {
+    color: "green";
+}
