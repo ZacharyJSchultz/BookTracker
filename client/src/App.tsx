@@ -9,12 +9,6 @@ function App() {
     const loc: Location = useLocation();
     const [alertVisible, setAlertVisible] = useState(false);
 
-    /*useEffect(() => {
-    fetch("http://localhost:8000/message")
-      .then((res) => res.json())
-      .then((data) => setBookData(data.message));
-  }, []);*/
-
     function getCurrLoc(): JSX.Element {
         if (loc.pathname.endsWith("/viewdb")) {
             return <ViewDB />;

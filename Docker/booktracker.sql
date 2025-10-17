@@ -30,10 +30,11 @@ CREATE TABLE BookGenres(
 CREATE TABLE BookLog(
 	book_id INT,
     rating TINYINT DEFAULT NULL,
-    dateCompleted DATETIME,
+    date_completed DATETIME,
     CONSTRAINT PK_BookLog PRIMARY KEY (book_id)
 );
 
+-- Genres and whether they are fiction / nonfiction are hard-coded (as of now)
 INSERT INTO Genres (genre_name, fiction, nonfiction) VALUES
     ("Fiction", 1, 0),
     ("Non-Fiction", 0, 1),

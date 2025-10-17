@@ -1,47 +1,12 @@
+import "../App.scss";
+
+import { FormEvent, useCallback, useState } from "react";
+import React from "react";
+
+import { FormData } from "../types";
 import Alert from "./Generic/Alert";
 import Checkbox from "./Generic/Checkbox";
 import Radio from "./Generic/Radio";
-import { FormEvent, useCallback, useState } from "react";
-import React from "react";
-import "../App.scss";
-
-// TODO: Get this from server!
-type FormData = {
-    title: string;
-    author: string;
-    rating: number;
-    Fiction?: boolean;
-    NonFiction?: boolean;
-    ActionAdventure?: boolean;
-    Comedy?: boolean;
-    CrimeMystery?: boolean;
-    Fantasy?: boolean;
-    Romance?: boolean;
-    ScienceFiction?: boolean;
-    HistoricalFiction?: boolean;
-    SuspenseThriller?: boolean;
-    Drama?: boolean;
-    Horror?: boolean;
-    Poetry?: boolean;
-    GraphicNovel?: boolean;
-    YoungAdult?: boolean;
-    ChildrensBook?: boolean;
-    Comic?: boolean;
-    MemoirAutobiography?: boolean;
-    Biography?: boolean;
-    FoodDrink?: boolean;
-    ArtPhotography?: boolean;
-    SelfHelp?: boolean;
-    History?: boolean;
-    Travel?: boolean;
-    TrueCrime?: boolean;
-    ScienceTechnology?: boolean;
-    HumanitiesSocialSciences?: boolean;
-    Essay?: boolean;
-    Guide?: boolean;
-    ReligionSpirituality?: boolean;
-    Other?: boolean;
-};
 
 function AddItem({
     alertVisible,
@@ -52,7 +17,6 @@ function AddItem({
 }) {
     const [failedValidation, setFailedValidation] = useState(false); // If form validation fails, set this variable (which will display validation errors, only upon failure)
     const [formData, setFormData] = useState<FormData>({
-        // State variable for Form Data, set after every change to the form.
         title: "",
         author: "",
         rating: 0,
@@ -68,7 +32,7 @@ function AddItem({
             // ID = the html ID of the value changed. Value = new value in that field. Basically, only update the field in the state variable that was modified
             const { id, value, checked } = e.target;
 
-            if (id == "Fiction") {
+            if (id === "Fiction") {
                 setNonFiction(false);
                 setFiction(checked); // Set fiction to true if fiction is checked
 
@@ -80,7 +44,7 @@ function AddItem({
                     Fiction: checked,
                     NonFiction: !checked,
                 });
-            } else if (id == "NonFiction") {
+            } else if (id === "NonFiction") {
                 setFiction(false);
                 setNonFiction(checked);
 
@@ -92,7 +56,7 @@ function AddItem({
                     NonFiction: checked,
                 });
             } else {
-                if (e.target.type == "checkbox") {
+                if (e.target.type === "checkbox") {
                     setFormData({
                         ...formData, // Use ... (spread) operator to create shallow copy of formData to restore in formData
                         [id]: checked, // Need to use checked instead of value (because default value is always 'on' for checkboxes)
@@ -161,10 +125,10 @@ function AddItem({
         }
     };
 
-    return (
-        <>
-            {/* Display alert if alertVisible true (if form submitted). On close, hide alert and reset response */}
-            {alertVisible && (
+    const displayAlert = () => {
+        // Display alert if alertVisible true (if form submitted). On close, hide alert and reset response
+        return (
+            alertVisible && (
                 <Alert
                     alertType={
                         responseText.includes("Error")
@@ -178,15 +142,170 @@ function AddItem({
                         setResponseCode(-1);
                     }}
                 >
-                    {responseCode < 500
-                        ? "Click 'Add Books' or the 'X' on the right to add another item!"
-                        : responseCode === 501
-                        ? "It appears that you've already read this book. If you assigned it any new genres, they have been updated in the database. If you'd like to re-add this book to your log or re-rate it, please remove the previous entry and then try again."
-                        : "Double-check your spelling and verify that this book isn't already in the database! To try again, click 'Add Books' or the 'X' on the right!"}
+                    {getResponse()}
                 </Alert>
-            )}
+            )
+        );
+    };
 
-            {/* Display alert if alertVisible false (if form not submitted) */}
+    const getResponse = () => {
+        return responseCode < 500
+            ? "Click 'Add Books' or the 'X' on the right to add another item!"
+            : responseCode === 501
+            ? "It appears that you've already read this book. If you assigned it any new genres, they have been updated in the database. If you'd like to re-add this book to your log or re-rate it, please remove the previous entry and then try again."
+            : "Double-check your spelling and verify that this book isn't already in the database! To try again, click 'Add Books' or the 'X' on the right!";
+    };
+
+    const displayCheckboxes = () => {
+        return (
+            <div className="checkbox-group">
+                {fiction && (
+                    <>
+                        <Checkbox
+                            id="ActionAdventure"
+                            handleChange={handleChange}
+                        >
+                            Action / Adventure
+                        </Checkbox>
+                        <Checkbox id="Comedy" handleChange={handleChange}>
+                            Comedy
+                        </Checkbox>
+                        <Checkbox id="CrimeMystery" handleChange={handleChange}>
+                            Crime / Mystery
+                        </Checkbox>
+                        <Checkbox id="Fantasy" handleChange={handleChange}>
+                            Fantasy
+                        </Checkbox>
+                        <Checkbox id="Romance" handleChange={handleChange}>
+                            Romance
+                        </Checkbox>
+                        <Checkbox
+                            id="ScienceFiction"
+                            handleChange={handleChange}
+                        >
+                            Science Fiction
+                        </Checkbox>
+                        <Checkbox
+                            id="HistoricalFiction"
+                            handleChange={handleChange}
+                        >
+                            Historical Fiction
+                        </Checkbox>
+                        <Checkbox
+                            id="SuspenseThriller"
+                            handleChange={handleChange}
+                        >
+                            Suspense / Thriller
+                        </Checkbox>
+                        <Checkbox id="Drama" handleChange={handleChange}>
+                            Drama
+                        </Checkbox>
+                        <Checkbox id="Horror" handleChange={handleChange}>
+                            Horror
+                        </Checkbox>
+                        <Checkbox id="Poetry" handleChange={handleChange}>
+                            Poetry
+                        </Checkbox>
+                        <Checkbox id="GraphicNovel" handleChange={handleChange}>
+                            Graphic Novel
+                        </Checkbox>
+                        <Checkbox id="YoungAdult" handleChange={handleChange}>
+                            Young Adult
+                        </Checkbox>
+                        <Checkbox
+                            id="ChildrensBook"
+                            handleChange={handleChange}
+                        >
+                            Children's Book
+                        </Checkbox>
+                        <Checkbox id="Comic" handleChange={handleChange}>
+                            Comic
+                        </Checkbox>
+                        <Checkbox id="Other" handleChange={handleChange}>
+                            Other
+                        </Checkbox>
+                    </>
+                )}
+                {nonFiction && (
+                    <>
+                        <Checkbox id="Comedy" handleChange={handleChange}>
+                            Comedy
+                        </Checkbox>
+                        <Checkbox id="Horror" handleChange={handleChange}>
+                            Horror
+                        </Checkbox>
+                        <Checkbox id="Poetry" handleChange={handleChange}>
+                            Poetry
+                        </Checkbox>
+                        <Checkbox
+                            id="ChildrensBook"
+                            handleChange={handleChange}
+                        >
+                            Children's Book
+                        </Checkbox>
+                        <Checkbox
+                            id="MemoirAutobiography"
+                            handleChange={handleChange}
+                        >
+                            Memoir / Autobiography
+                        </Checkbox>
+                        <Checkbox id="FoodDrink" handleChange={handleChange}>
+                            Food & Drink
+                        </Checkbox>
+                        <Checkbox
+                            id="ArtPhotography"
+                            handleChange={handleChange}
+                        >
+                            Art / Photography
+                        </Checkbox>
+                        <Checkbox id="SelfHelp" handleChange={handleChange}>
+                            Self Help
+                        </Checkbox>
+                        <Checkbox id="History" handleChange={handleChange}>
+                            History
+                        </Checkbox>
+                        <Checkbox id="Travel" handleChange={handleChange}>
+                            Travel
+                        </Checkbox>
+                        <Checkbox id="TrueCrime" handleChange={handleChange}>
+                            True Crime
+                        </Checkbox>
+                        <Checkbox
+                            id="ScienceTechnology"
+                            handleChange={handleChange}
+                        >
+                            Science / Technology
+                        </Checkbox>
+                        <Checkbox
+                            id="HumanitiesSocialSciences"
+                            handleChange={handleChange}
+                        >
+                            Humanities / Social Sciences
+                        </Checkbox>
+                        <Checkbox id="Essay" handleChange={handleChange}>
+                            Essay
+                        </Checkbox>
+                        <Checkbox id="Guide" handleChange={handleChange}>
+                            Guide
+                        </Checkbox>
+                        <Checkbox
+                            id="ReligionSpirituality"
+                            handleChange={handleChange}
+                        >
+                            Religion / Spirituality
+                        </Checkbox>
+                        <Checkbox id="Other" handleChange={handleChange}>
+                            Other
+                        </Checkbox>
+                    </>
+                )}
+            </div>
+        );
+    };
+
+    return (
+        <>
+            {displayAlert()}
             {!alertVisible && (
                 <div className="container mt-5">
                     <h2 className="mb-4">Submit a Book:</h2>
@@ -281,212 +400,7 @@ function AddItem({
                                 Non-Fiction
                             </Radio>
                             <p />
-                            {fiction && (
-                                <>
-                                    <Checkbox
-                                        id="ActionAdventure"
-                                        handleChange={handleChange}
-                                    >
-                                        Action / Adventure
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="Comedy"
-                                        handleChange={handleChange}
-                                    >
-                                        Comedy
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="CrimeMystery"
-                                        handleChange={handleChange}
-                                    >
-                                        Crime / Mystery
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="Fantasy"
-                                        handleChange={handleChange}
-                                    >
-                                        Fantasy
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="Romance"
-                                        handleChange={handleChange}
-                                    >
-                                        Romance
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="ScienceFiction"
-                                        handleChange={handleChange}
-                                    >
-                                        Science Fiction
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="HistoricalFiction"
-                                        handleChange={handleChange}
-                                    >
-                                        Historical Fiction
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="SuspenseThriller"
-                                        handleChange={handleChange}
-                                    >
-                                        Suspense / Thriller
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="Drama"
-                                        handleChange={handleChange}
-                                    >
-                                        Drama
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="Horror"
-                                        handleChange={handleChange}
-                                    >
-                                        Horror
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="Poetry"
-                                        handleChange={handleChange}
-                                    >
-                                        Poetry
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="GraphicNovel"
-                                        handleChange={handleChange}
-                                    >
-                                        Graphic Novel
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="YoungAdult"
-                                        handleChange={handleChange}
-                                    >
-                                        Young Adult
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="ChildrensBook"
-                                        handleChange={handleChange}
-                                    >
-                                        Children's Book
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="Comic"
-                                        handleChange={handleChange}
-                                    >
-                                        Comic
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="Other"
-                                        handleChange={handleChange}
-                                    >
-                                        Other
-                                    </Checkbox>
-                                </>
-                            )}
-                            {nonFiction && (
-                                <>
-                                    <Checkbox
-                                        id="Comedy"
-                                        handleChange={handleChange}
-                                    >
-                                        Comedy
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="Horror"
-                                        handleChange={handleChange}
-                                    >
-                                        Horror
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="Poetry"
-                                        handleChange={handleChange}
-                                    >
-                                        Poetry
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="ChildrensBook"
-                                        handleChange={handleChange}
-                                    >
-                                        Children's Book
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="MemoirAutobiography"
-                                        handleChange={handleChange}
-                                    >
-                                        Memoir / Autobiography
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="FoodDrink"
-                                        handleChange={handleChange}
-                                    >
-                                        Food & Drink
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="ArtPhotography"
-                                        handleChange={handleChange}
-                                    >
-                                        Art / Photography
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="SelfHelp"
-                                        handleChange={handleChange}
-                                    >
-                                        Self Help
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="History"
-                                        handleChange={handleChange}
-                                    >
-                                        History
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="Travel"
-                                        handleChange={handleChange}
-                                    >
-                                        Travel
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="TrueCrime"
-                                        handleChange={handleChange}
-                                    >
-                                        True Crime
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="ScienceTechnology"
-                                        handleChange={handleChange}
-                                    >
-                                        Science / Technology
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="HumanitiesSocialSciences"
-                                        handleChange={handleChange}
-                                    >
-                                        Humanities / Social Sciences
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="Essay"
-                                        handleChange={handleChange}
-                                    >
-                                        Essay
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="Guide"
-                                        handleChange={handleChange}
-                                    >
-                                        Guide
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="ReligionSpirituality"
-                                        handleChange={handleChange}
-                                    >
-                                        Religion / Spirituality
-                                    </Checkbox>
-                                    <Checkbox
-                                        id="Other"
-                                        handleChange={handleChange}
-                                    >
-                                        Other
-                                    </Checkbox>
-                                </>
-                            )}
+                            {displayCheckboxes()}
                             <p id="passwordHelpInline" className="form-text">
                                 Optional, can select one, many, or no genres
                             </p>

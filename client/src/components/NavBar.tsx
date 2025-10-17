@@ -1,12 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "../App.scss";
+import { NavBarProps } from "../types";
 
-type Props = {
-    setAlertVisible: React.Dispatch<React.SetStateAction<boolean>>;
-};
-
-function NavBar({ setAlertVisible }: Props) {
+function NavBar({ setAlertVisible }: NavBarProps) {
     const [selectedIndex, setSelectedIndex] = useState(-1);
 
     function getDynamicListItemStyling(elementIndex: number) {

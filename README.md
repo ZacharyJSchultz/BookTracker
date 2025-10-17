@@ -17,36 +17,34 @@ The goal of this project—from a coding standpoint—is to create a website sea
 The website will have both a form to input books, as well as a main page to view the already-read books. The database will store the book name and author name as the PK, as well as optional genre and rating categories. The site should also store the date the book was completed (defaulting to the date of the entry). Lastly, there should be a way to delete entries from the website, on the off chance an entry was mistaken.
 
 ## How To Run:
+
 To run this program, you must have Docker (either the desktop version or terminal) installed.
 
 To install Docker: https://docs.docker.com/get-docker/
 
-Once Docker is installed, follow these steps:  
+Once Docker is installed, follow these steps:
 
 1. Navigate to the docker folder
-   
 2. Turn Dockerfile into an image:  
-   &emsp; ```docker build -t booktracker .```  
-   <h6></h6>
-   &emsp; If this command (or the next) throws an error due to lack of permissions, try running terminal as administrator and/or put 'sudo' before the command!
-   <h6></h6>
+   &emsp; `docker build -t booktracker .`
+    <h6></h6>
+    &emsp; If this command (or the next) throws an error due to lack of permissions, try running terminal as administrator and/or put 'sudo' before the command!
+    <h6></h6>
 3. Turn Docker image into a container:  
-    &emsp; ```docker run --detach --name=BookTracker -p:13306:3306 booktracker```  
-4. Navigate to the client folder, and run the command:  
-    &emsp; ```npm install```
-5. Navigate to the server folder, and run the command:  
-    &emsp; ```npm install```
-6. From the server folder, run the command:  
-    &emsp; ```npm start```
-7. From a new terminal window, navigate back to the client folder, and run the command:  
-    &emsp; ```npm start```
-8. Navigate to http://localhost:3000/ in your choice of browser (if not opened automatically by the previous command).
-9. Enjoy!  
+   &emsp; `docker run --detach --name=BookTracker -p:13306:3306 booktracker`
+4. From the main project folder, run the command:  
+   &emsp; `npm install`
+5. Then run:  
+   &emsp; `npm run dev`
+6. From a new terminal window, navigate back to the client folder, and run the command:  
+   &emsp; `npm start`
+7. Navigate to http://localhost:3000/ in your choice of browser (if not opened automatically by the previous command).
+8. Enjoy!
 
 This sequence of commands creates a new Docker container for the process, binding the host's port 13306 (just a random port) to the container's port 3306 (MySQL connection port), allowing connection to the DB. Then, it installs the dependencies for the front-end and back-end, before running each one.
 
-To stop the container, use Docker Desktop or the command: ```docker container stop BookTracker```  
-To run the container, use Docker Desktop or the command: ```docker container start BookTracker```
+To stop the container, use Docker Desktop or the command: `docker container stop BookTracker`  
+To run the container, use Docker Desktop or the command: `docker container start BookTracker`
 
 <br>
 
@@ -61,20 +59,20 @@ For instance, in the current design, the user cannot remove a book from the Book
 
 ### Database
 
-The database consists of four primary tables: Books, Genres, BookLog, and BookGenres, strictly adhering to BCNF standards and following good normalization practices. 
+The database consists of four primary tables: Books, Genres, BookLog, and BookGenres, strictly adhering to BCNF standards and following good normalization practices.
 
-- The Books table consists of book_id (PK), title, and author attributes, where the (title, author) pair must be unique -- serving as a storage for only Books (no user information)
-- The Genres table consists of (genre_id, genre_name, fiction, nonfiction) entries -- storing the name of each genre, a numerical ID associated with it (which also serves as the PK), and 2 booleans consisting of whether the genre applies to fiction and nonfiction genres. As of now, these are predefined
-- The BookLog table stores user information, containing a book_id (PK), rating, and the date completed
-- The BookGenres table houses (book_id, genre_id) pairs, storing the genres for each book. One book can have multiple genres; consequently, the PK is the whole (book_id, genre_id) pair.
+-   The Books table consists of book_id (PK), title, and author attributes, where the (title, author) pair must be unique -- serving as a storage for only Books (no user information)
+-   The Genres table consists of (genre_id, genre_name, fiction, nonfiction) entries -- storing the name of each genre, a numerical ID associated with it (which also serves as the PK), and 2 booleans consisting of whether the genre applies to fiction and nonfiction genres. As of now, these are predefined
+-   The BookLog table stores user information, containing a book_id (PK), rating, and the date completed
+-   The BookGenres table houses (book_id, genre_id) pairs, storing the genres for each book. One book can have multiple genres; consequently, the PK is the whole (book_id, genre_id) pair.
 
 ### Application (System Design)
 
 This application consists of three parts: a front-end React/TypeScript website, a back-end node.js server, and a MySQL database hosted on a Docker container. As I would rather not pay for hosting at this current time, each part must be hosted on the user's system (however, it would not be difficult to scale this application to online hosting).
 
-- The front-end website serves as the user's gateway into the application, allowing them to add, remove, and view their entries
-- The back-end server bridges the front-end to the database, transmitting information to and from each side. Adding and removing books, querying the user's current logged entries -- this server handles all the back-end logic
-- The Docker container / MySQL database provides persistent storage, maintaining the user's information even if the app is shut down and allowing for use across multiple operating systems.
+-   The front-end website serves as the user's gateway into the application, allowing them to add, remove, and view their entries
+-   The back-end server bridges the front-end to the database, transmitting information to and from each side. Adding and removing books, querying the user's current logged entries -- this server handles all the back-end logic
+-   The Docker container / MySQL database provides persistent storage, maintaining the user's information even if the app is shut down and allowing for use across multiple operating systems.
 
 ### Front-End
 
@@ -95,9 +93,11 @@ The back-end consists of both the database, which provides storage for and acces
 ## Screenshots
 
 #### Home Page
-![Home Page Screenshot](/screenshots/home_page.png?raw=true)  
+
+![Home Page Screenshot](/screenshots/home_page.png?raw=true)
 
 #### Add Book
+
 ![Add Book Screenshot](/screenshots/add_book_form.png?raw=true)
 ![Add Book Complete Screenshot](/screenshots/add_book_form_success.png?raw=true)
 
@@ -110,5 +110,6 @@ Sorted by title:
 ![View DB Title-sorted Screenshot](/screenshots/view_db_titlesort.png?raw=true)
 
 #### Remove Item:
+
 ![Remove Item Screenshot](/screenshots/remove_item.png?raw=true)
 ![Remove Item Success Screenshot](/screenshots/remove_item_success.png?raw=true)
