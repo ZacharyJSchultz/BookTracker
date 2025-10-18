@@ -1,6 +1,8 @@
+import "../App.scss";
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import "../App.scss";
+
 import { NavBarProps } from "../types";
 
 function NavBar({ setAlertVisible }: NavBarProps) {
@@ -10,12 +12,12 @@ function NavBar({ setAlertVisible }: NavBarProps) {
         return {
             backgroundColor:
                 selectedIndex === elementIndex ? "#007bff" : "transparent",
-            color: selectedIndex === elementIndex ? "#D3D3D3" : "white",
+            color: selectedIndex === elementIndex ? "#D3D3D3" : "white"
         };
     }
 
     return (
-        <nav className="navbar navbar-expand-sm navbar-light bg-primary">
+        <nav className="navbar navbar-expand-sm navbar-light bg-primary bottom-padding">
             <div className="container-fluid nav-inner-container">
                 <Link to="" className="navbar-brand">
                     BookTracker

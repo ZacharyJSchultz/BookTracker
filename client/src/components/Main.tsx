@@ -1,9 +1,10 @@
-import React from "react";
 import "../App.scss";
+
+import React from "react";
 
 function Main() {
     return (
-        <div className="top-padding">
+        <div>
             <p className="large-font">
                 Welcome to BookTracker, a website that helps you organize and
                 track books you've read!

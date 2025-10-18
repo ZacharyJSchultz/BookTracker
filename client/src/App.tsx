@@ -1,9 +1,10 @@
-import NavBar from "./components/NavBar";
-import Main from "./components/Main";
-import AddItem from "./components/AddItem";
-import ViewDB from "./components/ViewDB";
 import React, { useState } from "react";
 import { Location, useLocation } from "react-router-dom";
+
+import AddItem from "./components/AddItem";
+import Main from "./components/Main";
+import NavBar from "./components/NavBar";
+import ViewDB from "./components/ViewDB";
 
 function App() {
     const loc: Location = useLocation();
@@ -27,6 +28,7 @@ function App() {
     return (
         <>
             <NavBar setAlertVisible={setAlertVisible} />
+            <div className="navbar-padding" />
             {getCurrLoc()}
             {/*<h1>{bookData}</h1>*/}
         </>

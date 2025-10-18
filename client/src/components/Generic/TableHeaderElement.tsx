@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React from "react";
 
 import { TableHeaderElementProps } from "../../types";
 
@@ -8,7 +8,7 @@ function TableHeaderElement({
     handleSort,
     sortDir,
     colKey,
-    children,
+    children
 }: TableHeaderElementProps) {
     let noWrapSpaces = String(children).replace(" ", "\u00A0"); // Replaces regular spaces with ones that prevent wrapping, to make the front-end look better
 
@@ -16,12 +16,7 @@ function TableHeaderElement({
         <th scope="col" className="text-center">
             <div className="table-header-element-inner-div">
                 &nbsp;
-                <span
-                    className="align-middle"
-                    style={{ flex: "1 1 auto", whiteSpace: "normal" }}
-                >
-                    {noWrapSpaces}
-                </span>
+                <span className="align-middle the-span">{noWrapSpaces}</span>
                 &ensp;
                 <button
                     type="button"
@@ -29,7 +24,7 @@ function TableHeaderElement({
                     aria-label="Sort"
                     onClick={() => handleSort(colKey)}
                 >
-                    <b>{sortDir ? "↓" : "↑"}</b>
+                    <b className="sort-button-arrow">{sortDir ? "🡓" : "🡑"}</b>
                 </button>
                 &nbsp;
             </div>

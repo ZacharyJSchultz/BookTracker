@@ -10,68 +10,64 @@ import Radio from "./Generic/Radio";
 
 function AddItem({
     alertVisible,
-    setAlertVisible,
+    setAlertVisible
 }: {
     alertVisible: boolean;
     setAlertVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-    const [failedValidation, setFailedValidation] = useState(false); // If form validation fails, set this variable (which will display validation errors, only upon failure)
+    const [failedValidation, setFailedValidation] = useState(false);
     const [formData, setFormData] = useState<FormData>({
         title: "",
         author: "",
-        rating: 0,
+        rating: 0
     });
-    const [responseText, setResponseText] = useState(""); // Used to store response from server after submitting form (displayed in alert as strongtext)
-    const [responseCode, setResponseCode] = useState(-1); // Used to determine specific error (500 = general, 501 = duplicate entry)
-    const [nonFiction, setNonFiction] = useState(false); // nonFiction and fiction used to display subgenres for the respective genre
+    const [responseText, setResponseText] = useState("");
+    const [responseCode, setResponseCode] = useState(-1);
+    const [nonFiction, setNonFiction] = useState(false);
     const [fiction, setFiction] = useState(false);
 
     // Handle changes in form to update SetFormData (can't handle in handleSubmit because that is an async function, so formData could be reset before being sent)
-    const handleChange = useCallback(
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            // ID = the html ID of the value changed. Value = new value in that field. Basically, only update the field in the state variable that was modified
-            const { id, value, checked } = e.target;
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, value, checked } = e.target;
 
-            if (id === "Fiction") {
-                setNonFiction(false);
-                setFiction(checked); // Set fiction to true if fiction is checked
+        // ID = the html ID of the value changed. Value = new value in that field. Basically, only update the field in the state variable that was modified
+        if (id === "Fiction") {
+            setNonFiction(false);
+            setFiction(checked);
 
-                // Reset all genre fields and set fiction
+            // Reset all genre fields and set fiction
+            setFormData({
+                title: formData.title,
+                author: formData.author,
+                rating: formData.rating,
+                Fiction: checked,
+                NonFiction: !checked
+            });
+        } else if (id === "NonFiction") {
+            setFiction(false);
+            setNonFiction(checked);
+
+            setFormData({
+                title: formData.title,
+                author: formData.author,
+                rating: formData.rating,
+                Fiction: !checked,
+                NonFiction: checked
+            });
+        } else {
+            if (e.target.type === "checkbox") {
                 setFormData({
-                    title: formData.title,
-                    author: formData.author,
-                    rating: formData.rating,
-                    Fiction: checked,
-                    NonFiction: !checked,
-                });
-            } else if (id === "NonFiction") {
-                setFiction(false);
-                setNonFiction(checked);
-
-                setFormData({
-                    title: formData.title,
-                    author: formData.author,
-                    rating: formData.rating,
-                    Fiction: !checked,
-                    NonFiction: checked,
+                    ...formData,
+                    [id]: checked // Need to use checked instead of value (because default value is always 'on' for checkboxes)
                 });
             } else {
-                if (e.target.type === "checkbox") {
-                    setFormData({
-                        ...formData, // Use ... (spread) operator to create shallow copy of formData to restore in formData
-                        [id]: checked, // Need to use checked instead of value (because default value is always 'on' for checkboxes)
-                    });
-                } else {
-                    setFormData({
-                        ...formData,
-                        [id]: value,
-                    });
-                }
+                setFormData({
+                    ...formData,
+                    [id]: value
+                });
             }
-            //console.log(formData);
-        },
-        []
-    );
+        }
+    };
 
     // Handle submitting of form to send to server and display alert
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -81,28 +77,25 @@ function AddItem({
 
         if (!form.checkValidity()) {
             event.stopPropagation();
-            setFailedValidation(true); // Rerenders the page, displaying the validation errors if form is invalid
-            return; // Return if form is invalid
+            setFailedValidation(true);
+            return;
         }
 
-        // Send form data asynchronously
         try {
-            setFailedValidation(false); // Set form to valid, so no validation stuff shows up on screen
+            setFailedValidation(false);
 
             const response = await fetch("http://localhost:8000/submit-form", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(formData)
             });
 
-            // Handle successful submission
             if (response.ok) {
                 console.log("Form submission successful!");
                 setFormData({
-                    // Reset form data
                     title: "",
                     author: "",
-                    rating: 0,
+                    rating: 0
                 });
             } else {
                 console.error(
@@ -111,7 +104,6 @@ function AddItem({
                 );
             }
 
-            // Check server's response, and set that response to the state variable (to be used in the alert)
             const resText = await response.text();
             const resCode = await response.status;
 
@@ -149,11 +141,21 @@ function AddItem({
     };
 
     const getResponse = () => {
-        return responseCode < 500
-            ? "Click 'Add Books' or the 'X' on the right to add another item!"
-            : responseCode === 501
-            ? "It appears that you've already read this book. If you assigned it any new genres, they have been updated in the database. If you'd like to re-add this book to your log or re-rate it, please remove the previous entry and then try again."
-            : "Double-check your spelling and verify that this book isn't already in the database! To try again, click 'Add Books' or the 'X' on the right!";
+        let resp = "";
+        if (responseCode === 501) {
+            resp =
+                "It appears that you've already read this book. If you assigned it any new genres, they have been updated in the database. If you'd like to re-add this book to your log or re-rate it, please remove the previous entry and then try again.";
+        } else if (responseCode === -1) {
+            resp = "Error reaching the server! Please try again later.";
+        } else if (responseCode < 500) {
+            resp =
+                "Click 'Add Books' or the 'X' on the right to add another item!";
+        } else {
+            resp =
+                "Double-check your spelling and verify that this book isn't already in the database! To try again, click 'Add Books' or the 'X' on the right!";
+        }
+
+        return resp;
     };
 
     const displayCheckboxes = () => {
@@ -307,7 +309,7 @@ function AddItem({
         <>
             {displayAlert()}
             {!alertVisible && (
-                <div className="container mt-5">
+                <div className="container generic-top-padding">
                     <h2 className="mb-4">Submit a Book:</h2>
 
                     {/* Form Start */}

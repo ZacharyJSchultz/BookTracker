@@ -1,7 +1,7 @@
 import "../App.scss";
 
 import { format, isAfter, isBefore, parseISO } from "date-fns";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import {
     BookKey,
@@ -10,7 +10,7 @@ import {
     GenreRow,
     IncomingData,
     SortInfo,
-    UnformattedDataRow,
+    UnformattedDataRow
 } from "../types";
 import Alert from "./Generic/Alert";
 import Modal from "./Generic/Modal";
@@ -28,24 +28,24 @@ function ViewDB() {
     const [responseText, setResponseText] = useState("");
     const [bookToRemove, setBookToRemove] = useState<BookKey>({
         title: "",
-        author: "",
+        author: ""
     });
     const [displayGenres, setDisplayGenres] = useState(0); // 0 = all genres, 1 = fiction genres, 2 = nonfiction genres, 3 = no genres
     const [genreMap, setGenreMap] = useState<GenreMap>(new Map()); // id => [name, fic, nonfic]
     const [currSorted, setCurrSorted] = useState<SortInfo>({
         key: "date_completed",
-        asc: false,
+        asc: false
     });
     const defaultHeaders = [
         ["Title", "title"],
         ["Author", "author"],
         ["Rating", "rating"],
-        ["Date Completed", "date_completed"],
+        ["Date Completed", "date_completed"]
     ];
 
     useEffect(() => {
         fetch("http://localhost:8000/view-db", {
-            method: "GET",
+            method: "GET"
         })
             .then((res) => {
                 if (!res.ok) throw new Error("Error: Response not ok");
@@ -91,7 +91,7 @@ function ViewDB() {
         const response = await fetch("http://localhost:8000/remove-item", {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(bookToRemove),
+            body: JSON.stringify(bookToRemove)
         });
 
         setResponseOk(response.ok);
@@ -138,7 +138,7 @@ function ViewDB() {
                 author: row.author,
                 rating: row.rating,
                 date_completed: row.date_completed,
-                genres: [],
+                genres: []
             };
         }
 
@@ -150,7 +150,7 @@ function ViewDB() {
         setCurrSorted((prev) => {
             return {
                 key: sortKey,
-                asc: prev.key === sortKey ? !prev.asc : true,
+                asc: prev.key === sortKey ? !prev.asc : true
             };
         });
 
@@ -283,6 +283,7 @@ function ViewDB() {
             }
         });
         setData(sortedData);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currSorted]);
 
     const mapGenreElementsToTableHeaderElements = () => {
@@ -338,6 +339,7 @@ function ViewDB() {
         return genreMap
             ? [...genreMap.entries()].map(([id, entryArr]) => {
                   const [name, fic, nonfic] = entryArr.values();
+                  const elementID = String(id).concat("-icon");
 
                   /* displayGenres = 0 is all, 1 is fiction, 2 is nonfiction, 3 is none*/
                   if (
@@ -347,9 +349,19 @@ function ViewDB() {
                   ) {
                       if (row.genres.includes(id))
                           return (
-                              <td className="checkmark text-center h2">✓</td>
+                              <td
+                                  className="checkmark text-center h2"
+                                  key={elementID}
+                              >
+                                  ✓
+                              </td>
                           );
-                      else return <td className="text-center h4">❌</td>;
+                      else
+                          return (
+                              <td className="text-center h4" key={elementID}>
+                                  ❌
+                              </td>
+                          );
                   } else return <></>;
               })
             : null;
@@ -381,7 +393,7 @@ function ViewDB() {
                             onClick={() => {
                                 setBookToRemove({
                                     title: row.title,
-                                    author: row.author,
+                                    author: row.author
                                 });
                                 setRemoveModalVisible(true);
                             }}
@@ -440,18 +452,14 @@ function ViewDB() {
                     {!responseOk && "Please try again."}
                 </Alert>
             )}
-            <div className="container mt-5">
+            <div className="container generic-top-padding">
                 <table className="table table-bordered table-hover">
-                    {/* TODO: Maybe turn into component ? Try to abstract some stuff away if possible*/}
                     <thead>
                         <tr>
                             <th scope="col" className="text-center">
                                 <span className="align-middle">#</span>
                             </th>
-                            {/* Map the hardcoded default elements to TableHeaderElements*/}
                             {mapDefaultHeadersToTableHeaderElements()}
-
-                            {/* Map the (dynamic) genre elements to TableHeaderElements */}
                             {mapGenreElementsToTableHeaderElements()}
                         </tr>
                     </thead>

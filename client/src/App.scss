@@ -1,4 +1,28 @@
-.navbar {
+/**
+ *  GENERAL
+ */
+.large-font {
+    font-size: 1.5em;
+}
+
+/**
+ *  PADDING
+ */
+.navbar-padding {
+    margin-top: 3.5em;
+    padding: 0.1em; // Prevents margin from collapsing - which would render generic-top-padding useless
+}
+
+.generic-top-padding {
+    margin-top: 3em;
+}
+
+/**
+ *  PAGES
+ */
+
+// Navbar
+nav.navbar {
     position: fixed;
     top: 0;
     left: 0;
@@ -17,34 +41,54 @@
     }
 }
 
+// ViewDB
+.checkmark {
+    color: green !important;
+}
+
+// Add Item
+.invalid-feedback {
+    color: red;
+}
+
+///
+/// GENERIC COMPONENTS
+///
+
+// Alert
+.alert {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.error-alert-icon,
+.success-alert-icon {
+    font-size: 2em;
+    margin: 0 0.5em 0 0;
+}
+
+.alert-strongtext {
+    font-size: 1.2em;
+}
+
+// TableHeaderElement
 .table-header-element-inner-div {
     display: flex;
-    align-items: center;
-    min-width: 75px;
-    max-width: 250px;
-    overflow-wrap: anywhere;
+    align-items: self-end;
+    min-width: 4.6875em;
+    max-width: 15.625em;
     word-wrap: break-word;
     margin: 0 auto;
 
     .sort-button {
-        height: 25px;
+        height: 1.8em;
         display: flex;
         align-items: center;
     }
 }
 
-.invalid-feedback {
-    color: red;
-}
-
-.large-font {
-    font-size: 1.5em;
-}
-
-.top-padding {
-    margin-top: 5px;
-}
-
-.checkmark {
-    color: "green";
+.the-span {
+    flex: 1 1 auto;
+    white-space: normal;
 }
