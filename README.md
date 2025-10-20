@@ -27,9 +27,9 @@ Once Docker is installed, follow these steps:
 1. Navigate to the docker folder
 2. Turn Dockerfile into an image:  
    &emsp; `docker build -t booktracker .`
-    <h6></h6>
-    &emsp; If this command (or the next) throws an error due to lack of permissions, try running terminal as administrator and/or put 'sudo' before the command!
-    <h6></h6>
+   <h6></h6>
+   &emsp; If this command (or the next) throws an error due to lack of permissions, try running terminal as administrator and/or put 'sudo' before the command!
+   <h6></h6>
 3. Turn Docker image into a container:  
    &emsp; `docker run --detach --name=BookTracker -p:13306:3306 booktracker`
 4. From the main project folder, run the command:  
@@ -50,23 +50,7 @@ To run the container, use Docker Desktop or the command: `docker container start
 
 <b>Note:</b> All times are stored in EST (America/New_York), no matter where the program is run from. Furthermore, times are all stored in 24-hour time.
 
-## Design
-
-For this app, I am chiefly designing it more as a model for a much larger, full-fledged application, as opposed to optimizing its current use.
-Essentially, I am designing it with scaling (to millions or even billions of books, and countless users) prioritized over usability. However, as of now, the application only supports a single user, and there is no Books database populated with billions of entries to pull from.
-
-For instance, in the current design, the user cannot remove a book from the Books table once it has been added, nor can they alter previously submitted genres for a book (because in a theoretical application, the user would have no control over the Books table, nor the genres it is classified as. But as I don't have a database to pull Books from, I rely on the users to manually input Books and Genres).
-
-### Database
-
-The database consists of four primary tables: Books, Genres, BookLog, and BookGenres, strictly adhering to BCNF standards and following good normalization practices.
-
--   The Books table consists of book_id (PK), title, and author attributes, where the (title, author) pair must be unique -- serving as a storage for only Books (no user information)
--   The Genres table consists of (genre_id, genre_name, fiction, nonfiction) entries -- storing the name of each genre, a numerical ID associated with it (which also serves as the PK), and 2 booleans consisting of whether the genre applies to fiction and nonfiction genres. As of now, these are predefined
--   The BookLog table stores user information, containing a book_id (PK), rating, and the date completed
--   The BookGenres table houses (book_id, genre_id) pairs, storing the genres for each book. One book can have multiple genres; consequently, the PK is the whole (book_id, genre_id) pair.
-
-### Application (System Design)
+## Application Design
 
 This application consists of three parts: a front-end React/TypeScript website, a back-end node.js server, and a MySQL database hosted on a Docker container. As I would rather not pay for hosting at this current time, each part must be hosted on the user's system (however, it would not be difficult to scale this application to online hosting).
 
@@ -86,9 +70,18 @@ Each genre has its own unique column, and the user has the option to display all
 
 Of note, rather than listing the genres of a book entered by a user in a single 'Genres' column, there is instead an individual column for each possible genre. From a design standpoint, I had to consider whether I wanted to create individual columns for each genre (which is cluttered and makes the tables very wide) or use a single 'Genres' column that only displays the selected genres (which is less cluttered, but prevents sorting by a specific genre). I believe the latter option takes a slight edge from a design standpoint, because book genres are generally sparse (especially since, in this application, you can only select Fiction OR Non-Fiction genres at once, meaning that -- at max -- only approximately half of the genres can be chosen for a given entry). Meaning it makes less sense to display ALL the genres, when only a few will likely be selected at once. However, I chose the first option anyways, because I deemed it more technically challenging (both stylistically, in the CSS and design, and implementation-wise, when it comes to implementing genre sorting), and I wanted to challenge myself. In the future, I would like to add the 'Genres' column as an option (and maybe use it by default), but allow the user to switch to this more cluttered version if they wish to sort by genre.
 
-### Back-End
+### Back-End Server
 
-The back-end consists of both the database, which provides storage for and access to the user's entries, and the Node.js server, which utilizes the mysql2/promise library to query said database. For the most part, it's pretty straight-forward, with request handlers for all the basic front-end functionality.
+The back-end server consists of the Node.js server, which utilizes the mysql2/promise library to query said database. For the most part, it's pretty straightforward, with request handlers for all the basic front-end functionality.
+
+### Database
+
+The database, which provides storage for and access to the user's entries, consists of four primary tables: Books, Genres, BookLog, and BookGenres, strictly adhering to BCNF standards and following good normalization practices.
+
+-   The Books table consists of book_id (PK), title, and author attributes, where the (title, author) pair must be unique -- serving as a storage for only Books (no user information)
+-   The Genres table consists of (genre_id, genre_name, fiction, nonfiction) entries -- storing the name of each genre, a numerical ID associated with it (which also serves as the PK), and 2 booleans consisting of whether the genre applies to fiction and nonfiction genres. As of now, these are predefined
+-   The BookLog table stores user information, containing a book_id (PK), rating, and the date completed
+-   The BookGenres table houses (book_id, genre_id) pairs, storing the genres for each book. One book can have multiple genres; consequently, the PK is the whole (book_id, genre_id) pair.
 
 ## Screenshots
 

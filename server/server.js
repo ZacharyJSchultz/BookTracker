@@ -1,31 +1,29 @@
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2/promise");
-//const fs = require("fs");     // Used for testing querying with files
-//const path = require("path");
-const bodyParser = require("body-parser"); // For parsing submit-form JSON
+const bodyParser = require("body-parser");
+const { forkJoin, take, from } = require("rxjs");
 
 const app = express();
 
+const getBookIdQuery = "SELECT book_id FROM Books where title=? AND author=?";
 const insertBooksQuery = "INSERT INTO Books (title, author) VALUES (?, ?)";
 const checkBookExistsQuery =
     "SELECT book_id FROM Books WHERE title = ? AND author = ?";
 const insertBookGenresQuery = "INSERT INTO BookGenres VALUES (?, ?)";
 const insertBookLogQuery = "INSERT INTO BookLog VALUES (?, ?, NOW())";
 const removeBookGenresQuery = "DELETE FROM BookGenres WHERE book_id = ?";
-const removeBookLogQuery =
-    "DELETE FROM BookLog WHERE book_id = (SELECT book_id FROM Books where title=? AND author=?)";
+const removeBookLogQuery = "DELETE FROM BookLog WHERE book_id = ?";
 
 // A very long and complicated query involving multiple joins to combine the BookLog & Books and BookGenres & Genres tables, and then to combine those two tables as well, to finally obtain a table of title, author, genre, rating, and date_completed (where each genre of a given book has its own row)
 const fetchQuery =
-    "SELECT BL.book_id, BL.title, BL.author, G.genre_id, BL.rating, BL.date_completed FROM ((SELECT * FROM BookGenres WHERE book_id IN (SELECT book_id FROM BookLog)) AS G LEFT JOIN (SELECT BL.book_id, title, author, rating, date_completed FROM (BookLog as BL LEFT JOIN Books as B ON BL.book_id = B.book_id)) AS BL ON G.book_id = BL.book_id) ORDER BY BL.date_completed DESC";
+    "SELECT BL.book_id, BL.title, BL.author, G.genre_id, BL.rating, BL.date_completed FROM ((SELECT * FROM BookGenres WHERE book_id IN (SELECT book_id FROM BookLog)) AS G RIGHT JOIN (SELECT BL.book_id, title, author, rating, date_completed FROM (BookLog as BL LEFT JOIN Books as B ON BL.book_id = B.book_id)) AS BL ON G.book_id = BL.book_id) ORDER BY BL.date_completed DESC";
 const fetchGenresQuery = "SELECT * FROM Genres"; // Simple query to obtain genre_id -> genre_name mapping (for sending to front-end)
 
 app.use(bodyParser.json());
 app.use(cors());
 app.use(express.json());
 
-const NUM_GENRES = 31; // 34 total preconfigured genres with const IDs (because they're configured in Docker startup)
 const GENRES_MAP = {
     Fiction: 1,
     NonFiction: 2,
@@ -57,20 +55,19 @@ const GENRES_MAP = {
     Essay: 28,
     Guide: 29,
     ReligionSpirituality: 30,
-    Other: 31,
+    Other: 31
 };
 
 async function main() {
-    // Connect to back-end DB
     const con = await mysql.createConnection({
         host: "localhost",
         user: "root",
         password: "password",
         port: 13306,
-        database: "BookTracker",
+        database: "BookTracker"
     });
 
-    /* Handle form submission, and send to database
+    /*
      *
      * Steps:
      *  1. Check if Book already exists in Books table.
@@ -95,12 +92,11 @@ async function main() {
                 }
             });*/
 
-            // Check if Book already exists in Books table. If it does, grab BookID (using Prepared Statements for safety)
             const [checkBookExistsQueryResults] = await con.execute(
                 checkBookExistsQuery,
                 [formData.title, formData.author]
             );
-            var bookID;
+            let bookID;
 
             // Begin transaction, to allow for rollbacks in the case of errors
             con.beginTransaction();
@@ -129,7 +125,9 @@ async function main() {
                     "\nAuthor(s):",
                     formData.author
                 );
-            } else bookID = checkBookExistsQueryResults[0].book_id; // Assign book_id if it already exists in Books
+            } else {
+                bookID = checkBookExistsQueryResults[0].book_id;
+            }
 
             // Add Book to BookGenres (even if it already exists, as the user could assign it new genres)
             for (const key in formData) {
@@ -138,7 +136,7 @@ async function main() {
                     try {
                         await con.execute(insertBookGenresQuery, [
                             bookID,
-                            GENRES_MAP[key],
+                            GENRES_MAP[key]
                         ]);
 
                         console.log(
@@ -176,9 +174,9 @@ async function main() {
 
             // Add to BookLog
             try {
-                const [insertBookLog] = await con.execute(insertBookLogQuery, [
+                await con.execute(insertBookLogQuery, [
                     bookID,
-                    formData.rating || 0,
+                    formData.rating || 0
                 ]);
 
                 console.log(
@@ -198,7 +196,7 @@ async function main() {
                         "by",
                         formData.author,
                         "has already been logged!"
-                    ); // Don't throw error if genre already exists, just continue adding...
+                    ); // Don't throw error if book already exists, just add new genres
                     con.commit(); // Commit transaction
                     return res
                         .status(501)
@@ -216,8 +214,7 @@ async function main() {
             }
         } catch (err) {
             console.log("Error executing query:", err.stack);
-
-            con.rollback(); // Rollback entire transaction in case of non-duplicate error
+            con.rollback();
             return res
                 .status(500)
                 .send("Error! Failed to insert book into database");
@@ -227,13 +224,14 @@ async function main() {
     // Handle the fetching of data, sending it to front-end to display in table
     app.get("/view-db", async (req, res) => {
         try {
-            // FetchQuery is big and complicated enough to capture everything needed to display, in the proper format
-            const books = await con.query(fetchQuery);
-            const genreMap = await con.query(fetchGenresQuery);
-
-            const rslt = [books[0], genreMap[0]];
-
-            return res.status(200).json(rslt);
+            const booksObs = from(con.query(fetchQuery));
+            const genreObs = from(con.query(fetchGenresQuery));
+            forkJoin([booksObs, genreObs])
+                .pipe(take(1))
+                .subscribe(([books, genreMap]) => {
+                    const rslt = [books[0], genreMap[0]];
+                    return res.status(200).json(rslt);
+                });
         } catch (err) {
             console.log("Error fetching data:", err.stack);
             return res.status(500).send("Error fetching data");
@@ -243,43 +241,50 @@ async function main() {
     /* Handle the removal of an item
      *
      * Steps:
-     *  1. Remove Book from BookLog
-     *  2. Remove Book from BookGenres (all instances of it with the relevant book_id)
+     *  1. Grab book_id from Books
+     *  2. Remove Book from BookLog
+     *  3. Remove Book from BookGenres (all instances of it with the relevant book_id)
      *
      *  Note: The book is not deleted from Books; it can just be reused if it is ever re-added.
      *  Likewise, the reason the book is deleted from BookGenres is so the user can switch the
-     *  genres if they choose if they ever re-add the book.
+     *  genres if they ever re-add the book.
      */
-    app.delete("/remove-item", (req, res) => {
+    app.delete("/remove-item", async (req, res) => {
         try {
-            con.execute(
-                removeBookLogQuery,
+            con.beginTransaction();
+
+            const bookInfo = await con.execute(
+                getBookIdQuery,
                 [req.body.title, req.body.author],
                 (err) => {
                     if (err) {
-                        console.log("Error removing item from BookLog:", err);
+                        console.log("Error getting book_id from Books:", err);
                         return res.status(500).send("Error removing item");
                     }
                 }
             );
 
-            con.execute(
-                removeBookGenresQuery,
-                [req.body.title, req.body.author],
-                (err) => {
-                    if (err) {
-                        console.log(
-                            "Error removing item from BookGenres:",
-                            err
-                        );
-                        return res.status(500).send("Error removing item");
-                    }
-                }
-            );
+            const bookID = bookInfo[0]?.[0]?.book_id;
+            if (!bookID) throw new Error("Error getting book_id from Books");
 
+            con.execute(removeBookLogQuery, [bookID], (err) => {
+                if (err) {
+                    console.log("Error removing item from BookLog:", err);
+                    return res.status(500).send("Error removing item");
+                }
+            });
+
+            con.execute(removeBookGenresQuery, [bookID], (err) => {
+                if (err) {
+                    console.log("Error removing item from BookGenres:", err);
+                    return res.status(500).send("Error removing item");
+                }
+            });
+
+            con.commit();
             return res.status(200).send("Entry successfully removed");
-        } catch (e) {
-            console.log("Error removing item:", e);
+        } catch (err) {
+            console.log("Error removing item:", err);
             return res.status(500).send("Error removing item");
         }
     });

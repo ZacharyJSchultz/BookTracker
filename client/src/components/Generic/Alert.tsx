@@ -18,8 +18,8 @@ const getAlertIcon = (alertType: string) => {
 
 const Alert = ({
     alertType = "alert-primary",
-    strongtext,
-    children,
+    strongtext = "",
+    children = "",
     onClose
 }: AlertProps) => {
     return (

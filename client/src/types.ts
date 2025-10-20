@@ -8,8 +8,8 @@ export type NavBarProps = {
 
 export type AlertProps = {
     alertType?: string;
-    strongtext: string;
-    children: ReactNode;
+    strongtext?: string;
+    children?: ReactNode;
     onClose: () => void;
 };
 
@@ -24,6 +24,8 @@ export type ModalProps = {
     modalTitle?: string;
     modalBody?: ReactElement;
     yesButton: string;
+    yesButtonClasses?: string;
+    noButtonClasses?: string;
     noButton: string;
     onYes: () => void;
     onNo: () => void;
@@ -37,10 +39,14 @@ export type RadioProps = {
 };
 
 export type TableHeaderElementProps = {
-    handleSort: (sortKey: string) => void;
-    sortDir: boolean | null;
+    handleSort?: (sortKey: string) => void;
+    sortDir?: boolean | null;
     colKey: string;
-    children: ReactNode;
+    showSortButton?: boolean;
+    minWidth?: string;
+    maxWidth?: string;
+    centerText?: boolean;
+    children?: ReactNode;
 };
 
 // Data Types
@@ -53,11 +59,11 @@ export type TableHeaderElementProps = {
  */
 
 export type FormattedDataRow = {
-    display_id: number; // This is different from the book_id, as the book_id can have gaps (due to how MySQL auto increment works)
+    displayID: number; // This is different from the book_id, as the book_id can have gaps (due to how MySQL auto increment works)
     title: string;
     author: string;
     rating: number;
-    date_completed: string;
+    dateCompleted: string;
     genres: number[];
 };
 

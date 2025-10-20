@@ -1,4 +1,5 @@
 import React, { ReactElement } from "react";
+
 import { ModalProps } from "../../types";
 
 function Modal({
@@ -7,16 +8,17 @@ function Modal({
     modalBody,
     yesButton,
     noButton,
+    yesButtonClasses = "btn-primary",
+    noButtonClasses = "btn-secondary",
     onYes,
-    onNo,
+    onNo
 }: ModalProps) {
     return (
         <div
             className="modal fade show d-block"
             tabIndex={-1}
             role="dialog"
-            aria-labelledby={`${modal}Modal`}
-            aria-hidden="true"
+            aria-label="Remove Modal"
         >
             <div className="modal-dialog" role="document">
                 <div className="modal-content">
@@ -29,14 +31,14 @@ function Modal({
                     <div className="modal-footer">
                         <button
                             type="button"
-                            className="btn btn-secondary"
+                            className={"btn " + yesButtonClasses}
                             onClick={onYes}
                         >
                             {yesButton}
                         </button>
                         <button
                             type="button"
-                            className="btn btn-primary"
+                            className={"btn " + noButtonClasses}
                             onClick={onNo}
                         >
                             {noButton}

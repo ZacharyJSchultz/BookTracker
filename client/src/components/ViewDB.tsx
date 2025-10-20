@@ -17,11 +17,9 @@ import Modal from "./Generic/Modal";
 import Radio from "./Generic/Radio";
 import TableHeaderElement from "./Generic/TableHeaderElement";
 
-// TODO: Idea: Add another mode/version of the table that, instead of having a col for each genre, instead lists all the genres for
-// an entry in a single "genres" column (like before). This mode could be switched to with a switch
-
 function ViewDB() {
     const [data, setData] = useState<FormattedDataRow[]>([]);
+    const [errorAlertVisible, setErrorAlertVisible] = useState(false);
     const [removeModalVisible, setRemoveModalVisible] = useState(false);
     const [removeAlertVisible, setRemoveAlertVisible] = useState(false);
     const [responseOk, setResponseOk] = useState(false);
@@ -30,17 +28,17 @@ function ViewDB() {
         title: "",
         author: ""
     });
-    const [displayGenres, setDisplayGenres] = useState(0); // 0 = all genres, 1 = fiction genres, 2 = nonfiction genres, 3 = no genres
+    const [displayGenres, setDisplayGenres] = useState(4); // 0 = all genres, 1 = fiction genres, 2 = nonfiction genres, 3 = no genres, 4 = single col genres list
     const [genreMap, setGenreMap] = useState<GenreMap>(new Map()); // id => [name, fic, nonfic]
     const [currSorted, setCurrSorted] = useState<SortInfo>({
-        key: "date_completed",
+        key: "dateCompleted",
         asc: false
     });
     const defaultHeaders = [
         ["Title", "title"],
         ["Author", "author"],
         ["Rating", "rating"],
-        ["Date Completed", "date_completed"]
+        ["Date Completed", "dateCompleted"]
     ];
 
     useEffect(() => {
@@ -53,66 +51,72 @@ function ViewDB() {
                 return res.json();
             })
             .then((data) => {
-                formatData(data);
+                initializeData(data);
+                setErrorAlertVisible(false);
             })
-            .catch((e) => console.error("Error fetching table:", e));
+            .catch((e) => {
+                console.error("Error fetching table:", e);
+                setErrorAlertVisible(true);
+            });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Transforms incoming data from the server (user data and genres list) into two distinct objects (data and genreMap, respectively).
-    const formatData = (data: IncomingData) => {
+    const initializeData = (data: IncomingData) => {
         setGenreMap(convertGenreArrayToMap(data[1]));
 
-        const tempData: FormattedDataRow[] = [];
-
-        let count = 1;
         // reverse() so entries start with the oldest
-        data[0].reverse().forEach((row) => {
-            initializeDataRow({ row, tempData, count });
-            count++;
-        });
-        setData(tempData);
+        const formattedData: FormattedDataRow[] = formatDataRows(
+            data[0].reverse()
+        );
+        setData(formattedData);
 
         // // currSorted set so that data defaults to descending by date (rather than ascending), so newer entries are conveniently placed at the top of the table
         // setCurrSorted({
-        //     key: "date_completed",
+        //     key: "dateCompleted",
         //     asc: false,
         // });
     };
 
     /*
       TODO: TODO LIST
-        - Resolve Add Item TODO
-        - Test/fix Removing (and everything)
+        - Get sorting working! Test/fix
+        - Set up genres types based on server response if possible...?
         - Go thru and fix / remove comments
+        - Organize functions better across large files (viewdb, additem)
+        - Double check README
     */
 
     const handleRemove = async () => {
-        const response = await fetch("http://localhost:8000/remove-item", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(bookToRemove)
-        });
+        try {
+            const response = await fetch("http://localhost:8000/remove-item", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(bookToRemove)
+            });
 
-        setResponseOk(response.ok);
-        setResponseText(await response.text());
-        if (!response.ok) {
-            console.error("Error removing entry!");
-        } else {
-            setData(
-                // Remove items where both title and author equal the bookToRemove - since (title, author) pairs must be unique, this won't run into problems
-                data.filter(
-                    (item) =>
-                        !(
-                            item.title === bookToRemove.title &&
-                            item.author === bookToRemove.author
-                        )
-                )
-            );
+            setResponseOk(response.ok);
+            setResponseText(await response.text());
+            if (!response.ok) {
+                console.error("Error removing entry!");
+            } else {
+                setData(
+                    // Remove items where both title and author equal the bookToRemove - since (title, author) pairs must be unique, this won't run into problems
+                    data.filter(
+                        (item) =>
+                            !(
+                                item.title === bookToRemove.title &&
+                                item.author === bookToRemove.author
+                            )
+                    )
+                );
+            }
+
+            setRemoveModalVisible(false);
+            setRemoveAlertVisible(true);
+        } catch (err) {
+            console.error("Error removing entry:", err);
         }
-
-        setRemoveModalVisible(false); // Hide modal
-        setRemoveAlertVisible(true); // Display remove alert
     };
 
     // Reduces GenreRow[] ( {number, string, bool, bool}[] ) into a single dictionary of (number, [string, bool, bool]) pairs
@@ -124,28 +128,32 @@ function ViewDB() {
         }, new Map<number, [string, boolean, boolean]>());
     };
 
-    const initializeDataRow = (params: {
-        row: UnformattedDataRow;
-        tempData: FormattedDataRow[];
-        count: number;
-    }): void => {
-        const { row, tempData, count } = params;
-        const id = row.book_id - 1; // MySQL AUTO INCREMENT starts at 1 by default, so subtract one to have the array start at 0.
-        if (!(id in tempData)) {
-            tempData[id] = {
-                display_id: count,
-                title: row.title,
-                author: row.author,
-                rating: row.rating,
-                date_completed: row.date_completed,
-                genres: []
-            };
-        }
+    const formatDataRows = (
+        unformattedData: UnformattedDataRow[]
+    ): FormattedDataRow[] => {
+        const formattedData: FormattedDataRow[] = [];
+        let count = 1;
 
-        tempData[id]!.genres.push(row.genre_id);
+        unformattedData.forEach((row) => {
+            const id = row.book_id - 1; // MySQL AUTO INCREMENT starts at 1 by default, so subtract one to have the array start at 0.
+            if (!(id in formattedData)) {
+                formattedData[id] = {
+                    displayID: count,
+                    title: row.title,
+                    author: row.author,
+                    rating: row.rating,
+                    dateCompleted: row.date_completed,
+                    genres: []
+                };
+                count++;
+            }
+
+            row.genre_id && formattedData[id]!.genres.push(row.genre_id);
+        });
+
+        return formattedData;
     };
 
-    // Update currSorted to whatever column is being sorted (callback passed to TableHeaderElement components)
     const handleSort = (sortKey: string) => {
         setCurrSorted((prev) => {
             return {
@@ -155,7 +163,7 @@ function ViewDB() {
         });
 
         /*const sorted = [...data].sort((a, b) => {
-        if (sortProp === "date_completed") {
+        if (sortProp === "dateCompleted") {
           let aDate = parseISO(a[sortProp])
           let bDate = parseISO(b[sortProp])
 
@@ -214,14 +222,13 @@ function ViewDB() {
       }*/
     };
 
-    // Actually change `data` after a change in currSorted
     const sortData = useEffect(() => {
         if (!currSorted.key) return;
 
         const sortedData = [...data].sort((a, b) => {
-            if (currSorted.key === "date_completed") {
-                let aDate = parseISO(a.date_completed);
-                let bDate = parseISO(b.date_completed);
+            if (currSorted.key === "dateCompleted") {
+                let aDate = parseISO(a.dateCompleted);
+                let bDate = parseISO(b.dateCompleted);
 
                 if (isBefore(aDate, bDate)) return currSorted.asc ? -1 : 1;
                 else if (isAfter(aDate, bDate)) return currSorted.asc ? 1 : -1;
@@ -287,33 +294,44 @@ function ViewDB() {
     }, [currSorted]);
 
     const mapGenreElementsToTableHeaderElements = () => {
-        return genreMap
-            ? Array.from(genreMap.values()).map(([name, fic, nonfic]) => {
-                  /* displayGenres = 0 is all, 1 is fiction, 2 is nonfiction, 3 is none*/
-                  if (
-                      displayGenres === 0 ||
-                      (fic && displayGenres === 1) ||
-                      (nonfic && displayGenres === 2)
-                  )
-                      return (
-                          <TableHeaderElement
-                              key={name}
-                              handleSort={handleSort}
-                              sortDir={
-                                  currSorted.key === name
-                                      ? currSorted.asc
-                                      : null
-                              }
-                              colKey={name}
-                          >
-                              {name}
-                          </TableHeaderElement>
-                      );
-                  else {
-                      return <></>;
-                  }
-              })
-            : null;
+        if (!genreMap || displayGenres === 3) return null;
+
+        return displayGenres === 4 ? (
+            <TableHeaderElement
+                colKey="genres"
+                minWidth="4.6875em"
+                maxWidth="15.625em"
+                showSortButton={false}
+            >
+                Genres
+            </TableHeaderElement>
+        ) : (
+            Array.from(genreMap.values()).map(([name, fic, nonfic]) => {
+                /* displayGenres = 0 is all, 1 is fiction, 2 is nonfiction, 3 is none, 4 is one genres col*/
+                if (
+                    displayGenres === 0 ||
+                    (fic && displayGenres === 1) ||
+                    (nonfic && displayGenres === 2)
+                )
+                    return (
+                        <TableHeaderElement
+                            key={name}
+                            handleSort={handleSort}
+                            sortDir={
+                                currSorted.key === name ? currSorted.asc : null
+                            }
+                            colKey={name}
+                            minWidth="4.6875em"
+                            maxWidth="15.625em"
+                        >
+                            {name}
+                        </TableHeaderElement>
+                    );
+                else {
+                    return null;
+                }
+            })
+        );
     };
 
     const mapDefaultHeadersToTableHeaderElements = () => {
@@ -328,6 +346,8 @@ function ViewDB() {
                             : null
                     }
                     colKey={formattedDataRowKey}
+                    minWidth="4.6875em"
+                    maxWidth="15.625em"
                 >
                     {displayName}
                 </TableHeaderElement>
@@ -336,52 +356,85 @@ function ViewDB() {
     };
 
     const fillGenreCells = (row: FormattedDataRow) => {
-        return genreMap
-            ? [...genreMap.entries()].map(([id, entryArr]) => {
-                  const [name, fic, nonfic] = entryArr.values();
-                  const elementID = String(id).concat("-icon");
+        if (!genreMap || displayGenres === 3) return;
 
-                  /* displayGenres = 0 is all, 1 is fiction, 2 is nonfiction, 3 is none*/
-                  if (
-                      displayGenres === 0 ||
-                      (fic && displayGenres === 1) ||
-                      (nonfic && displayGenres === 2)
-                  ) {
-                      if (row.genres.includes(id))
-                          return (
-                              <td
-                                  className="checkmark text-center h2"
-                                  key={elementID}
-                              >
-                                  ✓
-                              </td>
-                          );
-                      else
-                          return (
-                              <td className="text-center h4" key={elementID}>
-                                  ❌
-                              </td>
-                          );
-                  } else return <></>;
-              })
-            : null;
+        return displayGenres !== 4 ? (
+            // For 0 (all), 1 (fic), or 2 (nonfic), map check or x to each genre call
+            [...genreMap].map(([id, entryArr]) => {
+                const [name, fic, nonfic] = entryArr.values();
+                const elementID = String(id).concat("-icon");
+                if (
+                    displayGenres === 0 ||
+                    (fic && displayGenres === 1) ||
+                    (nonfic && displayGenres === 2)
+                ) {
+                    if (row.genres.includes(id)) {
+                        return (
+                            <td
+                                className="checkmark text-center h2"
+                                key={elementID}
+                            >
+                                ✓
+                            </td>
+                        );
+                    } else {
+                        return (
+                            <td className="text-center h4" key={elementID}>
+                                ❌
+                            </td>
+                        );
+                    }
+                } else return null;
+            })
+        ) : (
+            // For 4 (one genre col), insert list of strings into the single genre col
+            <td
+                className="text-center balance-text"
+                key={"genres-" + row.displayID}
+            >
+                <div className="invisible-wrap-length">
+                    {getWrapLengthPadding(row)}
+                </div>
+                {[...genreMap]
+                    .reduce((acc, value) => {
+                        return row.genres.includes(value[0])
+                            ? acc + value[1][0] + ", "
+                            : acc;
+                    }, "")
+                    // Slice extra comma and space at end
+                    .slice(0, -2)}
+            </td>
+        );
+    };
+
+    /**
+     * For the single genres col, wrap is set to balance. Table width is set to min-content (fit-content causes padding issue),
+     * but that causes wrap to compress as much as possible. To fix this, calculate wrap padding by inserting an invisible
+     * element of a calculated length
+     */
+    const getWrapLengthPadding = (row: FormattedDataRow): string => {
+        let count = 0;
+        for (const genreID in row.genres) {
+            count += genreMap.get(Number(genreID))?.[0].length ?? 0;
+        }
+
+        return "m".repeat(Math.floor(Math.min(count / 4, 30)));
     };
 
     const mapDataToRows = () => {
         return data.map((row) =>
             // For special cases, if row is ever somehow nonexistent / undefined
             row ? (
-                <tr key={row.display_id}>
-                    <th scope="row">{row.display_id}</th>
+                <tr key={row.displayID}>
+                    <th className="text-center" scope="row">
+                        {row.displayID}
+                    </th>
                     <td>{row.title}</td>
                     <td>{row.author}</td>
                     <td>{row.rating || "N/A"}</td>
                     <td>
-                        {row.date_completed
-                            ? format(
-                                  row.date_completed,
-                                  "MMMM dd, yyyy hh:mm a"
-                              )
+                        {row.dateCompleted
+                            ? format(row.dateCompleted, "MMMM dd, yyyy hh:mm a")
                             : "N/A"}
                     </td>
                     {fillGenreCells(row)}
@@ -407,6 +460,13 @@ function ViewDB() {
     const createRadios = () => {
         return (
             <div className="radio-group">
+                <Radio
+                    id="single-col-genres"
+                    handleChange={() => setDisplayGenres(4)}
+                    checked={displayGenres === 4}
+                >
+                    Show Genres in Single Column
+                </Radio>
                 <Radio
                     id="no-genres"
                     handleChange={() => setDisplayGenres(0)}
@@ -452,15 +512,35 @@ function ViewDB() {
                     {!responseOk && "Please try again."}
                 </Alert>
             )}
+            {errorAlertVisible && (
+                <Alert
+                    alertType="alert-danger"
+                    strongtext="Error: Failed to connect to server or database"
+                    onClose={() => {
+                        setErrorAlertVisible(false);
+                    }}
+                >
+                    Please reload the page and double check the server and
+                    container are both running!
+                </Alert>
+            )}
             <div className="container generic-top-padding">
                 <table className="table table-bordered table-hover">
                     <thead>
-                        <tr>
-                            <th scope="col" className="text-center">
-                                <span className="align-middle">#</span>
-                            </th>
+                        <tr key="header">
+                            <TableHeaderElement
+                                colKey="count"
+                                showSortButton={false}
+                                centerText={true}
+                            >
+                                #
+                            </TableHeaderElement>
                             {mapDefaultHeadersToTableHeaderElements()}
                             {mapGenreElementsToTableHeaderElements()}
+                            <TableHeaderElement
+                                colKey="remove"
+                                showSortButton={false}
+                            />
                         </tr>
                     </thead>
                     <tbody className="align-middle">{mapDataToRows()}</tbody>
@@ -493,6 +573,8 @@ function ViewDB() {
                     }
                     yesButton="Remove"
                     noButton="Cancel"
+                    yesButtonClasses="btn-danger"
+                    noButtonClasses="btn-primary"
                     onYes={handleRemove}
                     onNo={() => setRemoveModalVisible(false)}
                 />

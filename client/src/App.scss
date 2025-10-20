@@ -5,11 +5,31 @@
     font-size: 1.5em;
 }
 
+.balance-text {
+    text-wrap: balance;
+}
+
+.invisible-wrap-length {
+    visibility: hidden;
+    white-space: nowrap;
+    height: 0;
+    overflow: hidden;
+}
+
+table.table {
+    width: min-content;
+    text-align: center;
+}
+
+td {
+    padding-inline: 0.7em !important;
+}
+
 /**
  *  PADDING
  */
 .navbar-padding {
-    margin-top: 3.5em;
+    margin-top: 3.3em;
     padding: 0.1em; // Prevents margin from collapsing - which would render generic-top-padding useless
 }
 
@@ -69,15 +89,14 @@ nav.navbar {
 }
 
 .alert-strongtext {
-    font-size: 1.2em;
+    font-size: 1.15em;
 }
 
 // TableHeaderElement
-.table-header-element-inner-div {
+.the-inner-div {
     display: flex;
     align-items: self-end;
-    min-width: 4.6875em;
-    max-width: 15.625em;
+    width: fit-content;
     word-wrap: break-word;
     margin: 0 auto;
 

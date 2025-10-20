@@ -251,6 +251,9 @@ function AddItem({
                         >
                             Memoir / Autobiography
                         </Checkbox>
+                        <Checkbox id="Biography" handleChange={handleChange}>
+                            Biography
+                        </Checkbox>
                         <Checkbox id="FoodDrink" handleChange={handleChange}>
                             Food & Drink
                         </Checkbox>
