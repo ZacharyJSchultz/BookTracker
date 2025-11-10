@@ -1,0 +1,37 @@
+/**
+ *  GENERAL
+ */
+
+.large-font {
+    font-size: 1.5em;
+}
+
+.balance-text {
+    text-wrap: balance;
+    overflow-wrap: break-word;
+}
+
+.invisible-wrap-length {
+    visibility: hidden;
+    white-space: nowrap;
+    height: 0;
+    overflow: hidden;
+}
+
+table.table {
+    width: fit-content;
+    text-align: center;
+
+    .cell-width {
+        min-width: 4.6875em;
+        max-width: 18em;
+    }
+}
+
+td {
+    padding-inline: 0.7em !important;
+}
+
+.generic-top-padding {
+    margin-top: 3em;
+}

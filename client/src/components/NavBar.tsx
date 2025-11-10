@@ -1,9 +1,7 @@
-import "../App.scss";
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
-import { NavBarProps } from "../types";
+import { NavBarProps } from "../types/PropTypes";
 
 function NavBar({ setAlertVisible }: NavBarProps) {
     const [selectedIndex, setSelectedIndex] = useState(-1);

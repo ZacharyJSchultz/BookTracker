@@ -1,3 +1,7 @@
+import "./styles/General.scss";
+import "./styles/GenericComponents.scss";
+import "./styles/Pages.scss";
+
 import React, { useState } from "react";
 import { Location, useLocation } from "react-router-dom";
 

@@ -1,5 +1,6 @@
 import React from "react";
-import { CheckboxProps } from "../../types";
+
+import { CheckboxProps } from "../../types/PropTypes";
 
 function Checkbox({ id, handleChange, children }: CheckboxProps) {
     return (

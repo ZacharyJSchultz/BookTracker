@@ -1,5 +1,3 @@
-import "../App.scss";
-
 import React from "react";
 
 function Main() {

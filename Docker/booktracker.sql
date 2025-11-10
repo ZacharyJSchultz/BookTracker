@@ -7,8 +7,8 @@ DROP TABLE IF EXISTS BookLog;
 
 CREATE TABLE Books(
     book_id INT UNIQUE NOT NULL AUTO_INCREMENT,
-	title VARCHAR(50),
-    author VARCHAR(50),
+	title VARCHAR(100),
+    author VARCHAR(100),
     CONSTRAINT PK_Books PRIMARY KEY (book_id),
     CONSTRAINT Unique_Books UNIQUE (title, author)
 );

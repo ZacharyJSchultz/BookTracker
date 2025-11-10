@@ -1,0 +1,38 @@
+/**
+ *  PAGES
+ */
+
+// Navbar
+nav.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+
+    .nav-inner-container {
+        color: white;
+        font-weight: bold;
+    }
+
+    .nav-link,
+    .navbar-brand {
+        color: inherit;
+        font-weight: 500;
+    }
+}
+
+.navbar-padding {
+    margin-top: 3.3em;
+    padding: 0.1em; // Prevents margin from collapsing - which would render generic-top-padding useless
+}
+
+// ViewDB
+.checkmark {
+    color: green !important;
+}
+
+// Add Item
+.invalid-feedback {
+    color: red;
+}

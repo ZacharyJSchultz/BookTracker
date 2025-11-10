@@ -1,6 +1,6 @@
 import React from "react";
 
-import { TableHeaderElementProps } from "../../types";
+import { TableHeaderElementProps } from "../../types/PropTypes";
 
 // Note: Naming a prop "key" gives it special React properties, meaning that the value doesn't ACTUALLY get passed...
 // it's only used by the DOM, so it'll be undefined if you actually try to use it

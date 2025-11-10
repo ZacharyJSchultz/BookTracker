@@ -1,6 +1,6 @@
 import React, { ReactElement } from "react";
 
-import { ModalProps } from "../../types";
+import { ModalProps } from "../../types/PropTypes";
 
 function Modal({
     modal,

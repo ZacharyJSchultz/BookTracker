@@ -1,5 +1,6 @@
 import React from "react";
-import { RadioProps } from "../../types";
+
+import { RadioProps } from "../../types/PropTypes";
 
 function Radio({ id, handleChange, checked, children }: RadioProps) {
     return (

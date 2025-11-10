@@ -1,12 +1,10 @@
-import "../../App.scss";
-
 import React from "react";
 import {
     CheckCircleFill,
     ExclamationTriangleFill
 } from "react-bootstrap-icons";
 
-import { AlertProps } from "../../types";
+import { AlertProps } from "../../types/PropTypes";
 
 const getAlertIcon = (alertType: string) => {
     return alertType.includes("danger") ? (
@@ -24,12 +22,15 @@ const Alert = ({
 }: AlertProps) => {
     return (
         <>
+            {/* This padding is so heights aren't messed up by the fixed position of the alert */}
+            <div className="alert-padding"></div>
             <div
                 className={alertType.concat(
                     " ",
                     "alert alert-dismissible fade show"
                 )}
                 role="alert"
+                style={{ width: "fit-screen" }}
             >
                 <div>{getAlertIcon(alertType)}</div>
                 <div>
